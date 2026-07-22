@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.accessflow.controller.SettingsController"
+      styleClass="page-root" spacing="20">
+    <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+
+    <Label text="Configuración" styleClass="page-title"/>
+    <Label text="Ajustes del sistema y notificaciones por correo" styleClass="page-subtitle"/>
+
+    <!-- SMTP Config -->
+    <VBox styleClass="card" spacing="16" maxWidth="600">
+        <Label text="Configuración de correo (SMTP)" styleClass="card-title"/>
+        <Label text="Necesario para enviar notificaciones a los tutores." styleClass="page-subtitle"/>
+
+        <HBox spacing="16">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Servidor SMTP" styleClass="field-label"/>
+                <TextField fx:id="smtpHostField" promptText="smtp.gmail.com" styleClass="form-field"/>
+            </VBox>
+            <VBox spacing="6" prefWidth="120">
+                <Label text="Puerto" styleClass="field-label"/>
+                <TextField fx:id="smtpPortField" promptText="587" styleClass="form-field"/>
+            </VBox>
+        </HBox>
+        <VBox spacing="6">
+            <Label text="Correo remitente" styleClass="field-label"/>
+            <TextField fx:id="smtpEmailField" promptText="notificaciones@escuela.edu" styleClass="form-field"/>
+        </VBox>
+        <VBox spacing="6">
+            <Label text="Contraseña / App Password" styleClass="field-label"/>
+            <PasswordField fx:id="smtpPasswordField" promptText="Contraseña de aplicación" styleClass="form-field"/>
+        </VBox>
+
+        <Label text="Tip: Para Gmail usa una 'Contraseña de aplicación' desde tu cuenta Google." styleClass="hint-label" wrapText="true"/>
+
+        <Label fx:id="statusLabel" styleClass="status-label" wrapText="true"/>
+
+        <HBox spacing="8">
+            <Button text="Guardar configuración" styleClass="btn-primary" onAction="#handleGuardarSMTP"/>
+            <Button text="Enviar correo de prueba" styleClass="btn-secondary" onAction="#handleProbarEmail"/>
+        </HBox>
+    </VBox>
+
+    <!-- Info box -->
+    <VBox styleClass="card" spacing="8" maxWidth="600">
+        <Label text="Información del sistema" styleClass="card-title"/>
+        <HBox spacing="12">
+            <Label text="Versión:" styleClass="field-label"/>
+            <Label text="1.0.0" styleClass="info-value"/>
+        </HBox>
+        <HBox spacing="12">
+            <Label text="Base de datos:" styleClass="field-label"/>
+            <Label text="MySQL (XAMPP)" styleClass="info-value"/>
+        </HBox>
+        <HBox spacing="12">
+            <Label text="Tecnología:" styleClass="field-label"/>
+            <Label text="Java 17 + JavaFX 23 + Hibernate 6" styleClass="info-value"/>
+        </HBox>
+    </VBox>
+</VBox>

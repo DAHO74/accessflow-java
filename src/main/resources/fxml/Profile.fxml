@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.accessflow.controller.ProfileController"
+      styleClass="page-root" spacing="20">
+    <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+
+    <Label text="Mi Perfil" styleClass="page-title"/>
+    <Label text="Gestiona tu información de administrador" styleClass="page-subtitle"/>
+
+    <HBox spacing="20">
+
+        <!-- Avatar Card -->
+        <VBox styleClass="card" spacing="12" alignment="CENTER" prefWidth="260">
+            <Label fx:id="inicialLabel" text="A" styleClass="avatar-label"/>
+            <Label fx:id="nombreActualLabel" text="—" styleClass="profile-nombre"/>
+            <Label fx:id="emailActualLabel"  text="—" styleClass="profile-email"/>
+            <Label fx:id="creadoLabel"       text="" styleClass="profile-creado"/>
+            <Label text="Administrador" styleClass="badge badge-admin"/>
+        </VBox>
+
+        <!-- Edit Form -->
+        <VBox styleClass="card" spacing="14" HBox.hgrow="ALWAYS">
+            <Label text="Editar información" styleClass="card-title"/>
+
+            <VBox spacing="6">
+                <Label text="Nombre completo" styleClass="field-label"/>
+                <TextField fx:id="nombreField" styleClass="form-field"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Correo electrónico" styleClass="field-label"/>
+                <TextField fx:id="emailField" styleClass="form-field"/>
+            </VBox>
+
+            <Separator/>
+            <Label text="Cambiar contraseña (opcional)" styleClass="section-label"/>
+
+            <VBox spacing="6">
+                <Label text="Contraseña actual" styleClass="field-label"/>
+                <PasswordField fx:id="passActualField" promptText="Tu contraseña actual" styleClass="form-field"/>
+            </VBox>
+            <HBox spacing="12">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Nueva contraseña" styleClass="field-label"/>
+                    <PasswordField fx:id="passNuevaField" promptText="Nueva contraseña" styleClass="form-field"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Confirmar contraseña" styleClass="field-label"/>
+                    <PasswordField fx:id="passConfField" promptText="Confirmar" styleClass="form-field"/>
+                </VBox>
+            </HBox>
+
+            <Label fx:id="statusLabel" styleClass="status-label" wrapText="true"/>
+            <Button text="Guardar cambios" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleGuardar"/>
+        </VBox>
+    </HBox>
+</VBox>

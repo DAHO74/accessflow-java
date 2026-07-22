@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.accessflow.controller.AttendanceController"
+      styleClass="page-root" spacing="20">
+    <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+
+    <Label text="Registro de Asistencia" styleClass="page-title"/>
+    <Label text="Ingresa el ID o escanea la tarjeta RFID del alumno" styleClass="page-subtitle"/>
+
+    <!-- Input Panel -->
+    <VBox styleClass="card" spacing="16">
+        <Label text="Escanear / Ingresar ID" styleClass="card-title"/>
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="inputField" promptText="ID o código RFID..."
+                       styleClass="scan-input" HBox.hgrow="ALWAYS"
+                       onKeyPressed="#handleEnter"/>
+            <Button text="Registrar" styleClass="btn-primary" onAction="#handleRegistrar"
+                    prefWidth="120"/>
+        </HBox>
+
+        <!-- Result -->
+        <HBox styleClass="result-box" spacing="20" alignment="CENTER_LEFT">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label fx:id="resultNombreLabel" text="—" styleClass="result-nombre"/>
+                <Label fx:id="resultGrupoLabel"  text=""  styleClass="result-grupo"/>
+                <Label fx:id="resultHoraLabel"   text=""  styleClass="result-hora"/>
+            </VBox>
+            <Label fx:id="resultTipoLabel" text="—" styleClass="result-tipo"/>
+        </HBox>
+    </VBox>
+
+    <!-- Today's records -->
+    <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="12">
+        <Label text="Registros de hoy" styleClass="card-title"/>
+        <TableView fx:id="tablaHoy" VBox.vgrow="ALWAYS" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="colNombre"  text="Alumno"  prefWidth="200"/>
+                <TableColumn fx:id="colGrupo"   text="Grupo"   prefWidth="140"/>
+                <TableColumn fx:id="colEntrada" text="Entrada" prefWidth="100"/>
+                <TableColumn fx:id="colSalida"  text="Salida"  prefWidth="100"/>
+                <TableColumn fx:id="colEstado"  text="Estado"  prefWidth="120"/>
+            </columns>
+            <placeholder><Label text="Sin registros hoy" styleClass="table-placeholder"/></placeholder>
+        </TableView>
+    </VBox>
+</VBox>

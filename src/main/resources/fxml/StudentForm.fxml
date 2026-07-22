@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<DialogPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.accessflow.controller.StudentFormController"
+            prefWidth="380" prefHeight="300">
+
+    <header><Label text="Datos del Alumno" styleClass="dialog-header"/></header>
+
+    <content>
+        <VBox spacing="14">
+            <padding><Insets top="16" right="4" bottom="8" left="4"/></padding>
+
+            <VBox spacing="6">
+                <Label text="Nombre completo *" styleClass="field-label"/>
+                <TextField fx:id="nombreField" promptText="Nombre del alumno" styleClass="form-field"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="RFID / Código" styleClass="field-label"/>
+                <TextField fx:id="rfidField" promptText="Dejar vacío si no aplica" styleClass="form-field"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Grupo" styleClass="field-label"/>
+                <ComboBox fx:id="grupoCombo" prefWidth="Infinity"/>
+            </VBox>
+
+            <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
+
+            <Button fx:id="guardarBtn" text="Guardar" styleClass="btn-primary" maxWidth="Infinity"/>
+        </VBox>
+    </content>
+</DialogPane>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.accessflow.controller.DashboardController"
+      styleClass="page-root" spacing="20">
+    <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label fx:id="bienvenidaLabel" styleClass="page-title"/>
+            <Label text="Panel de control" styleClass="page-subtitle"/>
+        </VBox>
+        <Button text="Actualizar" styleClass="btn-secondary" onAction="#handleRefrescar"/>
+    </HBox>
+
+    <!-- Stats Cards -->
+    <HBox spacing="16">
+        <VBox styleClass="stat-card stat-blue" HBox.hgrow="ALWAYS" spacing="6" alignment="CENTER">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Total Alumnos" styleClass="stat-label"/>
+            <Label fx:id="totalAlumnosLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card stat-green" HBox.hgrow="ALWAYS" spacing="6" alignment="CENTER">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Presentes Hoy" styleClass="stat-label"/>
+            <Label fx:id="presentesLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card stat-red" HBox.hgrow="ALWAYS" spacing="6" alignment="CENTER">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Ausentes Hoy" styleClass="stat-label"/>
+            <Label fx:id="ausentesLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card stat-purple" HBox.hgrow="ALWAYS" spacing="6" alignment="CENTER">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Total Grupos" styleClass="stat-label"/>
+            <Label fx:id="totalGruposLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+    </HBox>
+
+    <!-- Table Card -->
+    <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="12">
+        <Label text="Registros de hoy" styleClass="card-title"/>
+        <TableView fx:id="tablaHoy" VBox.vgrow="ALWAYS" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="colNombre"  text="Alumno"   prefWidth="200"/>
+                <TableColumn fx:id="colGrupo"   text="Grupo"    prefWidth="120"/>
+                <TableColumn fx:id="colEntrada" text="Entrada"  prefWidth="100"/>
+                <TableColumn fx:id="colSalida"  text="Salida"   prefWidth="100"/>
+                <TableColumn fx:id="colEstado"  text="Estado"   prefWidth="120"/>
+            </columns>
+            <placeholder><Label text="No hay registros hoy" styleClass="table-placeholder"/></placeholder>
+        </TableView>
+    </VBox>
+</VBox>

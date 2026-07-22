@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.accessflow.controller.RegisterController"
+           styleClass="auth-root">
+
+    <VBox styleClass="auth-card" maxWidth="400" spacing="14" alignment="CENTER">
+        <padding><Insets top="36" right="40" bottom="36" left="40"/></padding>
+
+        <VBox alignment="CENTER" spacing="4">
+            <Label text="AF" styleClass="auth-logo"/>
+            <Label text="Crear Cuenta" styleClass="auth-title"/>
+            <Label text="Registra el administrador del sistema" styleClass="auth-subtitle"/>
+        </VBox>
+
+        <Region minHeight="8"/>
+
+        <VBox spacing="6">
+            <Label text="Nombre completo" styleClass="field-label"/>
+            <TextField fx:id="nombreField" promptText="Ej: Juan García" styleClass="auth-field"/>
+        </VBox>
+        <VBox spacing="6">
+            <Label text="Correo electrónico" styleClass="field-label"/>
+            <TextField fx:id="emailField" promptText="admin@escuela.edu" styleClass="auth-field"/>
+        </VBox>
+        <VBox spacing="6">
+            <Label text="Contraseña" styleClass="field-label"/>
+            <PasswordField fx:id="passwordField" promptText="Mínimo 6 caracteres" styleClass="auth-field"/>
+        </VBox>
+        <VBox spacing="6">
+            <Label text="Confirmar contraseña" styleClass="field-label"/>
+            <PasswordField fx:id="confirmField" promptText="Repite la contraseña" styleClass="auth-field"/>
+        </VBox>
+
+        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
+
+        <Button text="Crear Cuenta" styleClass="btn-primary" maxWidth="Infinity"
+                onAction="#handleRegistrar"/>
+
+        <HBox alignment="CENTER" spacing="4">
+            <Label text="¿Ya tienes cuenta?" styleClass="link-text"/>
+            <Hyperlink text="Iniciar sesión" onAction="#handleIrALogin" styleClass="link-btn"/>
+        </HBox>
+    </VBox>
+</StackPane>

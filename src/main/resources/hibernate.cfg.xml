@@ -1,0 +1,25 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/accessflow_db?serverTimezone=UTC&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password"></property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.show_sql">false</property>
+        <property name="hibernate.connection.pool_size">10</property>
+
+        <mapping class="com.accessflow.model.Admin"/>
+        <mapping class="com.accessflow.model.Grupo"/>
+        <mapping class="com.accessflow.model.Alumno"/>
+        <mapping class="com.accessflow.model.Tutor"/>
+        <mapping class="com.accessflow.model.AlumnoTutor"/>
+        <mapping class="com.accessflow.model.Asistencia"/>
+        <mapping class="com.accessflow.model.Mensaje"/>
+        <mapping class="com.accessflow.model.MensajeDestinatario"/>
+        <mapping class="com.accessflow.model.Configuracion"/>
+    </session-factory>
+</hibernate-configuration>

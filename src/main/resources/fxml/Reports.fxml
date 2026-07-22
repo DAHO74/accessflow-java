@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.accessflow.controller.ReportsController"
+      styleClass="page-root" spacing="20">
+    <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Reportes" styleClass="page-title"/>
+            <Label text="Genera y exporta reportes de asistencia" styleClass="page-subtitle"/>
+        </VBox>
+        <Button text="Exportar CSV" styleClass="btn-secondary" onAction="#exportarCSV"/>
+        <Button text="Generar" styleClass="btn-primary" onAction="#generarReporte"/>
+    </HBox>
+
+    <!-- Filters -->
+    <VBox styleClass="card" spacing="14">
+        <Label text="Parámetros del reporte" styleClass="card-title"/>
+        <HBox spacing="16" alignment="CENTER_LEFT">
+            <VBox spacing="6">
+                <Label text="Desde" styleClass="field-label"/>
+                <DatePicker fx:id="desdeField"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Hasta" styleClass="field-label"/>
+                <DatePicker fx:id="hastaField"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Grupo" styleClass="field-label"/>
+                <ComboBox fx:id="grupoCombo" prefWidth="180"/>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <!-- Summary -->
+    <HBox spacing="16">
+        <VBox styleClass="stat-card stat-blue" HBox.hgrow="ALWAYS" spacing="4" alignment="CENTER">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+            <Label text="Total registros" styleClass="stat-label"/>
+            <Label fx:id="totalLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card stat-green" HBox.hgrow="ALWAYS" spacing="4" alignment="CENTER">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+            <Label text="Promedio diario" styleClass="stat-label"/>
+            <Label fx:id="promedioLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+    </HBox>
+
+    <!-- Table -->
+    <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="12">
+        <TableView fx:id="tabla" VBox.vgrow="ALWAYS" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="colNombre"  text="Alumno"  prefWidth="190"/>
+                <TableColumn fx:id="colGrupo"   text="Grupo"   prefWidth="130"/>
+                <TableColumn fx:id="colFecha"   text="Fecha"   prefWidth="110"/>
+                <TableColumn fx:id="colEntrada" text="Entrada" prefWidth="90"/>
+                <TableColumn fx:id="colSalida"  text="Salida"  prefWidth="90"/>
+            </columns>
+            <placeholder><Label text="Genera un reporte para ver resultados" styleClass="table-placeholder"/></placeholder>
+        </TableView>
+    </VBox>
+</VBox>

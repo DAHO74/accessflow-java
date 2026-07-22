@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.accessflow.controller.MessagingController"
+      styleClass="page-root" spacing="20">
+    <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+
+    <Label text="Mensajería" styleClass="page-title"/>
+    <Label text="Envía notificaciones a padres y tutores" styleClass="page-subtitle"/>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- Compose -->
+        <VBox styleClass="card" spacing="14" prefWidth="420">
+            <Label text="Nuevo mensaje" styleClass="card-title"/>
+
+            <!-- Type selector -->
+            <HBox spacing="0" styleClass="toggle-group">
+                <ToggleButton fx:id="btnIndividual" text="Individual" styleClass="toggle-left"  maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <ToggleButton fx:id="btnGrupal"     text="Grupal"     styleClass="toggle-right" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Recipient -->
+            <VBox spacing="6">
+                <Label fx:id="tutorLabel" text="Seleccionar tutor" styleClass="field-label"/>
+                <ComboBox fx:id="tutorCombo" prefWidth="Infinity" maxWidth="Infinity"/>
+                <Label fx:id="grupoLabel" text="Seleccionar grupo" styleClass="field-label" visible="false"/>
+                <ComboBox fx:id="grupoCombo" prefWidth="Infinity" maxWidth="Infinity" visible="false"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Asunto" styleClass="field-label"/>
+                <TextField fx:id="asuntoField" promptText="Asunto del mensaje" styleClass="form-field"/>
+            </VBox>
+            <VBox spacing="6" VBox.vgrow="ALWAYS">
+                <Label text="Mensaje" styleClass="field-label"/>
+                <TextArea fx:id="cuerpoArea" promptText="Escribe el mensaje aquí..."
+                          styleClass="form-area" VBox.vgrow="ALWAYS" wrapText="true"/>
+            </VBox>
+
+            <Label fx:id="statusLabel" styleClass="status-label" wrapText="true"/>
+            <Button text="Enviar Mensaje" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleEnviar"/>
+        </VBox>
+
+        <!-- History -->
+        <VBox styleClass="card" spacing="12" HBox.hgrow="ALWAYS">
+            <Label text="Historial de mensajes" styleClass="card-title"/>
+            <TableView fx:id="historialTabla" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colFecha"         text="Fecha"        prefWidth="130"/>
+                    <TableColumn fx:id="colTipo"          text="Tipo"         prefWidth="90"/>
+                    <TableColumn fx:id="colAsunto"        text="Asunto"       prefWidth="200"/>
+                    <TableColumn fx:id="colDestinatarios" text="Destinatarios" prefWidth="110"/>
+                </columns>
+                <placeholder><Label text="Sin mensajes enviados" styleClass="table-placeholder"/></placeholder>
+            </TableView>
+        </VBox>
+    </HBox>
+</VBox>
