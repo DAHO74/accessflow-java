@@ -30,6 +30,7 @@
             <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
 
             <Button fx:id="guardarBtn" text="Guardar" styleClass="btn-primary" maxWidth="Infinity"/>
+
         </VBox>
     </content>
 </DialogPane>

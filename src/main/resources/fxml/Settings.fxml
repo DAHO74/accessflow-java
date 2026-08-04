@@ -5,61 +5,49 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.accessflow.controller.SettingsController"
+      fx:controller="com.accessflow.controller.AboutController"
       styleClass="page-root" spacing="20">
     <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
 
-    <Label text="Configuración" styleClass="page-title"/>
-    <Label text="Ajustes del sistema y notificaciones por correo" styleClass="page-subtitle"/>
+    <Label text="Acerca de AccessFlow" styleClass="page-title"/>
+    <Label text="Información del sistema y equipo de desarrollo" styleClass="page-subtitle"/>
 
-    <!-- SMTP Config -->
+    <!-- App Info -->
     <VBox styleClass="card" spacing="16" maxWidth="600">
-        <Label text="Configuración de correo (SMTP)" styleClass="card-title"/>
-        <Label text="Necesario para enviar notificaciones a los tutores." styleClass="page-subtitle"/>
+        <Label text="AccessFlow" styleClass="card-title"/>
+        <Label text="Sistema de control de asistencia escolar con tecnología RFID."
+               styleClass="page-subtitle" wrapText="true"/>
 
-        <HBox spacing="16">
-            <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Servidor SMTP" styleClass="field-label"/>
-                <TextField fx:id="smtpHostField" promptText="smtp.gmail.com" styleClass="form-field"/>
-            </VBox>
-            <VBox spacing="6" prefWidth="120">
-                <Label text="Puerto" styleClass="field-label"/>
-                <TextField fx:id="smtpPortField" promptText="587" styleClass="form-field"/>
-            </VBox>
-        </HBox>
-        <VBox spacing="6">
-            <Label text="Correo remitente" styleClass="field-label"/>
-            <TextField fx:id="smtpEmailField" promptText="notificaciones@escuela.edu" styleClass="form-field"/>
+        <VBox spacing="8">
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Versión:" styleClass="field-label" minWidth="140"/>
+                <Label text="1.0.0" styleClass="info-value"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Plataforma:" styleClass="field-label" minWidth="140"/>
+                <Label text="Escritorio  (Windows / macOS / Linux)" styleClass="info-value"/>
+            </HBox>
         </VBox>
-        <VBox spacing="6">
-            <Label text="Contraseña / App Password" styleClass="field-label"/>
-            <PasswordField fx:id="smtpPasswordField" promptText="Contraseña de aplicación" styleClass="form-field"/>
-        </VBox>
-
-        <Label text="Tip: Para Gmail usa una 'Contraseña de aplicación' desde tu cuenta Google." styleClass="hint-label" wrapText="true"/>
-
-        <Label fx:id="statusLabel" styleClass="status-label" wrapText="true"/>
-
-        <HBox spacing="8">
-            <Button text="Guardar configuración" styleClass="btn-primary" onAction="#handleGuardarSMTP"/>
-            <Button text="Enviar correo de prueba" styleClass="btn-secondary" onAction="#handleProbarEmail"/>
-        </HBox>
     </VBox>
 
-    <!-- Info box -->
-    <VBox styleClass="card" spacing="8" maxWidth="600">
-        <Label text="Información del sistema" styleClass="card-title"/>
-        <HBox spacing="12">
-            <Label text="Versión:" styleClass="field-label"/>
-            <Label text="1.0.0" styleClass="info-value"/>
-        </HBox>
-        <HBox spacing="12">
-            <Label text="Base de datos:" styleClass="field-label"/>
-            <Label text="MySQL (XAMPP)" styleClass="info-value"/>
-        </HBox>
-        <HBox spacing="12">
-            <Label text="Tecnología:" styleClass="field-label"/>
-            <Label text="Java 17 + JavaFX 23 + Hibernate 6" styleClass="info-value"/>
-        </HBox>
+    <!-- Team -->
+    <VBox styleClass="card" spacing="16" maxWidth="600">
+        <Label text="Equipo de desarrollo" styleClass="card-title"/>
+
+        <VBox spacing="4">
+            <Label text="Dylan Alexis Hernandez Oliver" styleClass="field-label"/>
+            <Label text="Desarrollador" styleClass="page-subtitle"/>
+        </VBox>
+        <Separator/>
+        <VBox spacing="4">
+            <Label text="David Mondragon Lopez" styleClass="field-label"/>
+            <Label text="Desarrollador" styleClass="page-subtitle"/>
+        </VBox>
+        <Separator/>
+        <VBox spacing="4">
+            <Label text="Arturo Salinas Rugerio" styleClass="field-label"/>
+            <Label text="Desarrollador" styleClass="page-subtitle"/>
+        </VBox>
     </VBox>
+
 </VBox>

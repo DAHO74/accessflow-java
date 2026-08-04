@@ -51,6 +51,7 @@ public class DashboardController implements Initializable {
     }
 
     private void configurarTabla() {
+        tablaHoy.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         colNombre.setCellValueFactory(c ->
             new javafx.beans.property.SimpleStringProperty(c.getValue().getAlumno().getNombre()));
         colGrupo.setCellValueFactory(c -> {

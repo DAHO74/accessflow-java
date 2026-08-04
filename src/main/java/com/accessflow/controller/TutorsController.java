@@ -22,7 +22,9 @@ public class TutorsController implements Initializable {
     @FXML private TableColumn<Tutor, String> colEmail;
     @FXML private TableColumn<Tutor, String> colTelefono;
     @FXML private TableColumn<Tutor, String> colAlumnos;
-    @FXML private Label totalLabel;
+    @FXML private Label  totalLabel;
+    @FXML private Button btnEditar;
+    @FXML private Button btnEliminar;
 
     private ObservableList<Tutor> data = FXCollections.observableArrayList();
 
@@ -40,7 +42,18 @@ public class TutorsController implements Initializable {
             new javafx.beans.property.SimpleStringProperty(
                 String.valueOf(c.getValue().getAlumnos().size())));
 
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setItems(data);
+
+        var seleccion = tabla.getSelectionModel().selectedItemProperty();
+        btnEditar.disableProperty().bind(seleccion.isNull());
+        btnEliminar.disableProperty().bind(seleccion.isNull());
+
+        tabla.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2 && tabla.getSelectionModel().getSelectedItem() != null)
+                abrirFormulario(tabla.getSelectionModel().getSelectedItem());
+        });
+
         cargar();
     }
 

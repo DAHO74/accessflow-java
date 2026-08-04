@@ -21,7 +21,7 @@ public class GroupFormController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        turnoCombo.getItems().addAll("Matutino", "Vespertino", "Nocturno");
+        turnoCombo.getItems().addAll("Matutino", "Vespertino");
         turnoCombo.setValue("Matutino");
         guardarBtn.setOnAction(e -> handleGuardar());
     }

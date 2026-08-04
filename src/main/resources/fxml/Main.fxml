@@ -58,7 +58,7 @@
                 <spacing>2</spacing>
                 <Separator styleClass="nav-sep"/>
                 <Button fx:id="btnPerfil"        text="  Mi Perfil"       styleClass="nav-btn" maxWidth="Infinity" onAction="#handlePerfil"/>
-                <Button fx:id="btnConfiguracion" text="  Configuración"   styleClass="nav-btn" maxWidth="Infinity" onAction="#handleConfiguracion"/>
+                <Button fx:id="btnConfiguracion" text="  Acerca de"       styleClass="nav-btn" maxWidth="Infinity" onAction="#handleConfiguracion"/>
                 <Button                          text="  Cerrar Sesión"   styleClass="nav-btn nav-logout" maxWidth="Infinity" onAction="#handleLogout"/>
             </VBox>
         </VBox>

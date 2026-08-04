@@ -38,8 +38,8 @@
         </TableView>
 
         <HBox spacing="8" alignment="CENTER_RIGHT">
-            <Button text="Editar"   styleClass="btn-secondary" onAction="#handleEditar"/>
-            <Button text="Eliminar" styleClass="btn-danger"    onAction="#handleEliminar"/>
+            <Button fx:id="btnEditar"   text="Editar"   styleClass="btn-secondary" onAction="#handleEditar"   disable="true"/>
+            <Button fx:id="btnEliminar" text="Eliminar" styleClass="btn-danger"    onAction="#handleEliminar" disable="true"/>
         </HBox>
     </VBox>
 </VBox>

@@ -29,11 +29,11 @@
             <HBox spacing="12">
                 <VBox spacing="6" HBox.hgrow="ALWAYS">
                     <Label text="Vincular alumno" styleClass="field-label"/>
-                    <ComboBox fx:id="alumnoCombo" prefWidth="Infinity"/>
+                    <ComboBox fx:id="alumnoCombo" maxWidth="Infinity"/>
                 </VBox>
-                <VBox spacing="6" prefWidth="140">
+                <VBox spacing="6" prefWidth="150" HBox.hgrow="NEVER">
                     <Label text="Parentesco" styleClass="field-label"/>
-                    <ComboBox fx:id="parentescoCombo" prefWidth="Infinity"/>
+                    <ComboBox fx:id="parentescoCombo" maxWidth="Infinity"/>
                 </VBox>
             </HBox>
 

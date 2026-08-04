@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.util.Optional;
@@ -21,7 +22,9 @@ public class GroupsController implements Initializable {
     @FXML private TableColumn<Grupo, String> colGrado;
     @FXML private TableColumn<Grupo, String> colTurno;
     @FXML private TableColumn<Grupo, String> colAlumnos;
-    @FXML private Label totalLabel;
+    @FXML private Label  totalLabel;
+    @FXML private Button btnEditar;
+    @FXML private Button btnEliminar;
 
     private ObservableList<Grupo> data = FXCollections.observableArrayList();
 
@@ -39,7 +42,18 @@ public class GroupsController implements Initializable {
             new javafx.beans.property.SimpleStringProperty(
                 String.valueOf(c.getValue().getAlumnos().size())));
 
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setItems(data);
+
+        var seleccion = tabla.getSelectionModel().selectedItemProperty();
+        btnEditar.disableProperty().bind(seleccion.isNull());
+        btnEliminar.disableProperty().bind(seleccion.isNull());
+
+        tabla.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2 && tabla.getSelectionModel().getSelectedItem() != null)
+                abrirFormulario(tabla.getSelectionModel().getSelectedItem());
+        });
+
         cargar();
     }
 

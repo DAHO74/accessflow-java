@@ -45,7 +45,9 @@ public class CrudService {
 
     public static List<Grupo> listarGrupos() {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
-            return s.createQuery("FROM Grupo ORDER BY grado, nombre", Grupo.class).list();
+            return s.createQuery(
+                "SELECT DISTINCT g FROM Grupo g LEFT JOIN FETCH g.alumnos ORDER BY g.grado, g.nombre",
+                Grupo.class).list();
         }
     }
 
@@ -70,7 +72,9 @@ public class CrudService {
 
     public static List<Tutor> listarTutores() {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
-            return s.createQuery("FROM Tutor ORDER BY nombre", Tutor.class).list();
+            return s.createQuery(
+                "SELECT DISTINCT t FROM Tutor t LEFT JOIN FETCH t.alumnos ORDER BY t.nombre",
+                Tutor.class).list();
         }
     }
 
@@ -94,8 +98,17 @@ public class CrudService {
     public static void vincularTutor(Alumno alumno, Tutor tutor, String parentesco) {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = s.beginTransaction();
-            AlumnoTutor at = new AlumnoTutor(alumno, tutor, parentesco);
-            s.persist(at);
+            AlumnoTutor existing = s.createQuery(
+                "FROM AlumnoTutor WHERE alumno.id = :a AND tutor.id = :t", AlumnoTutor.class)
+                .setParameter("a", alumno.getId())
+                .setParameter("t", tutor.getId())
+                .uniqueResult();
+            if (existing != null) {
+                existing.setParentesco(parentesco);
+                s.merge(existing);
+            } else {
+                s.persist(new AlumnoTutor(alumno, tutor, parentesco));
+            }
             tx.commit();
         }
     }
