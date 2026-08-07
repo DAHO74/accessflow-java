@@ -1,73 +1,53 @@
 package com.accessflow.service;
 
-import com.accessflow.model.Configuracion;
-import com.accessflow.util.HibernateUtil;
+import com.accessflow.dao.ConfiguracionDAO;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.hibernate.Session;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class EmailService {
 
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final ConfiguracionDAO configuracionDAO = new ConfiguracionDAO();
 
-    private static String getCfg(Session session, String clave, String defecto) {
-        Configuracion c = session.get(Configuracion.class, clave);
-        return c != null ? c.getValor() : defecto;
-    }
+    /**
+     * Envía un correo electrónico usando la configuración SMTP guardada en BD.
+     * Devuelve null si el envío fue exitoso, o un mensaje de error en caso contrario.
+     */
+    public static String enviar(String destinatario, String asunto, String cuerpo) {
+        String host     = configuracionDAO.obtener("smtp_host");
+        String puerto   = configuracionDAO.obtener("smtp_puerto");
+        String usuario  = configuracionDAO.obtener("smtp_usuario");
+        String password = configuracionDAO.obtener("smtp_password");
 
-    public static boolean enviarCorreo(String destinatario, String asunto, String cuerpo) {
-        try (Session hSession = HibernateUtil.getSessionFactory().openSession()) {
-            String host = getCfg(hSession, "smtp.host", "smtp.gmail.com");
-            String port = getCfg(hSession, "smtp.port", "587");
-            String email = getCfg(hSession, "smtp.email", "");
-            String pass  = getCfg(hSession, "smtp.password", "");
+        if (usuario.isEmpty() || password.isEmpty()) {
+            return "SMTP no configurado. Ve a Configuración para ingresar las credenciales.";
+        }
 
-            if (email.isBlank() || pass.isBlank()) return false;
+        Properties props = new Properties();
+        props.put("mail.smtp.auth",            "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host",            host);
+        props.put("mail.smtp.port",            puerto);
 
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", host);
-            props.put("mail.smtp.port", port);
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(usuario, password);
+            }
+        });
 
-            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props,
-                new Authenticator() {
-                    @Override protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(email, pass);
-                    }
-                });
-
-            MimeMessage msg = new MimeMessage(mailSession);
-            msg.setFrom(new InternetAddress(email));
+        try {
+            Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(usuario));
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
             msg.setSubject(asunto);
-            msg.setText(cuerpo, "utf-8", "html");
+            msg.setText(cuerpo);
             Transport.send(msg);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            return null; // sin error
+        } catch (MessagingException e) {
+            return "Error al enviar: " + e.getMessage();
         }
-    }
-
-    public static boolean notificarEntrada(String tutorEmail, String alumnoNombre, LocalDateTime hora) {
-        String asunto = "AccessFlow — Entrada de " + alumnoNombre;
-        String cuerpo = "<p>El alumno <strong>" + alumnoNombre +
-            "</strong> registró su <strong>entrada</strong> a las " +
-            hora.format(FMT) + ".</p>";
-        return enviarCorreo(tutorEmail, asunto, cuerpo);
-    }
-
-    public static boolean notificarSalida(String tutorEmail, String alumnoNombre, LocalDateTime hora) {
-        String asunto = "AccessFlow — Salida de " + alumnoNombre;
-        String cuerpo = "<p>El alumno <strong>" + alumnoNombre +
-            "</strong> registró su <strong>salida</strong> a las " +
-            hora.format(FMT) + ".</p>";
-        return enviarCorreo(tutorEmail, asunto, cuerpo);
     }
 }

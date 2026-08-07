@@ -1,36 +1,34 @@
 package com.accessflow.model;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "AlumnoTutor")
 public class AlumnoTutor {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "alumno_id")
-    private Alumno alumno;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tutor_id")
-    private Tutor tutor;
-
+    private int    id;
+    private int    alumnoId;
+    private int    tutorId;
     private String parentesco;
 
+    // Datos extra para mostrar en tablas sin consultas adicionales
+    private String alumnoNombre;
+    private String tutorNombre;
+
     public AlumnoTutor() {}
-    public AlumnoTutor(Alumno alumno, Tutor tutor, String parentesco) {
-        this.alumno = alumno;
-        this.tutor = tutor;
+
+    public AlumnoTutor(int alumnoId, int tutorId, String parentesco) {
+        this.alumnoId   = alumnoId;
+        this.tutorId    = tutorId;
         this.parentesco = parentesco;
     }
 
-    public Long getId() { return id; }
-    public Alumno getAlumno() { return alumno; }
-    public void setAlumno(Alumno alumno) { this.alumno = alumno; }
-    public Tutor getTutor() { return tutor; }
-    public void setTutor(Tutor tutor) { this.tutor = tutor; }
-    public String getParentesco() { return parentesco; }
+    public int getId()                           { return id; }
+    public void setId(int id)                    { this.id = id; }
+    public int getAlumnoId()                     { return alumnoId; }
+    public void setAlumnoId(int alumnoId)        { this.alumnoId = alumnoId; }
+    public int getTutorId()                      { return tutorId; }
+    public void setTutorId(int tutorId)          { this.tutorId = tutorId; }
+    public String getParentesco()                { return parentesco; }
     public void setParentesco(String parentesco) { this.parentesco = parentesco; }
+    public String getAlumnoNombre()              { return alumnoNombre; }
+    public void setAlumnoNombre(String nombre)   { this.alumnoNombre = nombre; }
+    public String getTutorNombre()               { return tutorNombre; }
+    public void setTutorNombre(String nombre)    { this.tutorNombre = nombre; }
 }

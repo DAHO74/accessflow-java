@@ -1,51 +1,46 @@
 package com.accessflow.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 
-@Entity
-@Table(name = "Mensaje")
 public class Mensaje {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "admin_id")
-    private Admin admin;
-
-    private String asunto;
-
-    @Column(columnDefinition = "TEXT")
-    private String cuerpo;
-
-    private String tipo; // "individual" o "grupal"
-
-    @Column(name = "enviado_en")
-    private LocalDateTime enviadoEn = LocalDateTime.now();
-
-    @OneToMany(mappedBy = "mensaje", cascade = CascadeType.ALL)
-    private List<MensajeDestinatario> destinatarios = new ArrayList<>();
+    private int           id;
+    private int           usuarioId;
+    private int           tutorId;
+    private String        tutorNombre; // para mostrar en tablas
+    private String        asunto;
+    private String        cuerpo;
+    private LocalDateTime enviadoEn;
 
     public Mensaje() {}
-    public Mensaje(Admin admin, String asunto, String cuerpo, String tipo) {
-        this.admin = admin;
-        this.asunto = asunto;
-        this.cuerpo = cuerpo;
-        this.tipo = tipo;
+
+    public Mensaje(int usuarioId, int tutorId, String asunto, String cuerpo) {
+        this.usuarioId = usuarioId;
+        this.tutorId   = tutorId;
+        this.asunto    = asunto;
+        this.cuerpo    = cuerpo;
+        this.enviadoEn = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public Admin getAdmin() { return admin; }
-    public void setAdmin(Admin admin) { this.admin = admin; }
-    public String getAsunto() { return asunto; }
-    public void setAsunto(String asunto) { this.asunto = asunto; }
-    public String getCuerpo() { return cuerpo; }
-    public void setCuerpo(String cuerpo) { this.cuerpo = cuerpo; }
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
-    public LocalDateTime getEnviadoEn() { return enviadoEn; }
-    public List<MensajeDestinatario> getDestinatarios() { return destinatarios; }
+    public int getId()                          { return id; }
+    public void setId(int id)                   { this.id = id; }
+    public int getUsuarioId()                   { return usuarioId; }
+    public void setUsuarioId(int usuarioId)     { this.usuarioId = usuarioId; }
+    public int getTutorId()                     { return tutorId; }
+    public void setTutorId(int tutorId)         { this.tutorId = tutorId; }
+    public String getTutorNombre()              { return tutorNombre; }
+    public void setTutorNombre(String nombre)   { this.tutorNombre = nombre; }
+    public String getAsunto()                   { return asunto; }
+    public void setAsunto(String asunto)        { this.asunto = asunto; }
+    public String getCuerpo()                   { return cuerpo; }
+    public void setCuerpo(String cuerpo)        { this.cuerpo = cuerpo; }
+    public LocalDateTime getEnviadoEn()         { return enviadoEn; }
+    public void setEnviadoEn(LocalDateTime dt)  { this.enviadoEn = dt; }
+
+    public String getFechaTexto() {
+        return enviadoEn != null ? enviadoEn.format(FORMATO) : "-";
+    }
 }

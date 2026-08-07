@@ -1,38 +1,46 @@
 package com.accessflow.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-@Entity
-@Table(name = "Asistencia")
 public class Asistencia {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "alumno_id", nullable = false)
-    private Alumno alumno;
-
-    @Column(name = "fecha_entrada")
+    private int           id;
+    private int           alumnoId;
+    private String        alumnoNombre; // para mostrar en tablas
+    private String        grupoNombre;  // para mostrar en tablas
     private LocalDateTime fechaEntrada;
-
-    @Column(name = "fecha_salida")
     private LocalDateTime fechaSalida;
 
     public Asistencia() {}
-    public Asistencia(Alumno alumno, LocalDateTime fechaEntrada) {
-        this.alumno = alumno;
-        this.fechaEntrada = fechaEntrada;
+
+    public int getId()                         { return id; }
+    public void setId(int id)                  { this.id = id; }
+    public int getAlumnoId()                   { return alumnoId; }
+    public void setAlumnoId(int alumnoId)      { this.alumnoId = alumnoId; }
+    public String getAlumnoNombre()            { return alumnoNombre; }
+    public void setAlumnoNombre(String nombre) { this.alumnoNombre = nombre; }
+    public String getGrupoNombre()             { return grupoNombre; }
+    public void setGrupoNombre(String nombre)  { this.grupoNombre = nombre; }
+    public LocalDateTime getFechaEntrada()     { return fechaEntrada; }
+    public void setFechaEntrada(LocalDateTime dt) { this.fechaEntrada = dt; }
+    public LocalDateTime getFechaSalida()      { return fechaSalida; }
+    public void setFechaSalida(LocalDateTime dt)  { this.fechaSalida = dt; }
+
+    public String getHoraEntrada() {
+        return fechaEntrada != null ? fechaEntrada.format(FORMATO_HORA) : "-";
     }
 
-    public Long getId() { return id; }
-    public Alumno getAlumno() { return alumno; }
-    public void setAlumno(Alumno alumno) { this.alumno = alumno; }
-    public LocalDateTime getFechaEntrada() { return fechaEntrada; }
-    public void setFechaEntrada(LocalDateTime fechaEntrada) { this.fechaEntrada = fechaEntrada; }
-    public LocalDateTime getFechaSalida() { return fechaSalida; }
-    public void setFechaSalida(LocalDateTime fechaSalida) { this.fechaSalida = fechaSalida; }
+    public String getHoraSalida() {
+        return fechaSalida != null ? fechaSalida.format(FORMATO_HORA) : "-";
+    }
+
+    public String getFechaTexto() {
+        return fechaEntrada != null ? fechaEntrada.format(FORMATO_FECHA) : "-";
+    }
 
     public String getEstado() {
         return fechaSalida != null ? "Completa" : "En escuela";

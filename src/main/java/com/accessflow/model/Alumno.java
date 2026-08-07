@@ -1,44 +1,38 @@
 package com.accessflow.model;
 
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
-@Table(name = "Alumno")
 public class Alumno {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    private int    id;
     private String nombre;
-
-    @Column(name = "rfid_uid", unique = true)
     private String rfidUid;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "grupo_id")
-    private Grupo grupo;
-
-    @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
-    private List<AlumnoTutor> tutores = new ArrayList<>();
+    private int    grupoId;
+    private int    tutorId;
+    private String grupoNombre;  // para mostrar en tablas
+    private String tutorNombre;  // para mostrar en tablas
 
     public Alumno() {}
-    public Alumno(String nombre, String rfidUid, Grupo grupo) {
-        this.nombre = nombre;
-        this.rfidUid = rfidUid;
-        this.grupo = grupo;
+
+    public Alumno(String nombre, String rfidUid, int grupoId, int tutorId) {
+        this.nombre   = nombre;
+        this.rfidUid  = rfidUid;
+        this.grupoId  = grupoId;
+        this.tutorId  = tutorId;
     }
 
-    public Long getId() { return id; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public String getRfidUid() { return rfidUid; }
-    public void setRfidUid(String rfidUid) { this.rfidUid = rfidUid; }
-    public Grupo getGrupo() { return grupo; }
-    public void setGrupo(Grupo grupo) { this.grupo = grupo; }
-    public List<AlumnoTutor> getTutores() { return tutores; }
+    public int getId()                         { return id; }
+    public void setId(int id)                  { this.id = id; }
+    public String getNombre()                  { return nombre; }
+    public void setNombre(String nombre)       { this.nombre = nombre; }
+    public String getRfidUid()                 { return rfidUid; }
+    public void setRfidUid(String rfidUid)     { this.rfidUid = rfidUid; }
+    public int getGrupoId()                    { return grupoId; }
+    public void setGrupoId(int grupoId)        { this.grupoId = grupoId; }
+    public int getTutorId()                    { return tutorId; }
+    public void setTutorId(int tutorId)        { this.tutorId = tutorId; }
+    public String getGrupoNombre()             { return grupoNombre; }
+    public void setGrupoNombre(String nombre)  { this.grupoNombre = nombre; }
+    public String getTutorNombre()             { return tutorNombre; }
+    public void setTutorNombre(String nombre)  { this.tutorNombre = nombre; }
 
     @Override
     public String toString() { return nombre; }
