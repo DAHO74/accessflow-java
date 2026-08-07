@@ -81,7 +81,7 @@ public class GroupFormPanel extends JPanel {
         Componentes.estilizarCampo(campoGrado);
 
         // ComboBox con los turnos más comunes
-        String[] opciones = {"", "Matutino", "Vespertino", "Nocturno"};
+        String[] opciones = {"", "Matutino", "Vespertino"};
         cmbTurno = new JComboBox<>(opciones);
         estilizarComboBox(cmbTurno);
 
