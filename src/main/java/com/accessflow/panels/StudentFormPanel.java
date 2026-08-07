@@ -93,9 +93,39 @@ public class StudentFormPanel extends JPanel {
         for (Grupo g : grupoDAO.listarTodos()) cmbGrupo.addItem(g);
         estilizarCombo(cmbGrupo, "Sin grupo");
 
+        // Apellido del alumno actual (última palabra del nombre) para detectar hermanos
+        String apellidoActual = "";
+        if (alumno != null) {
+            String nombreCompleto = alumno.getNombre().trim();
+            int ultimoEspacio = nombreCompleto.lastIndexOf(' ');
+            apellidoActual = (ultimoEspacio >= 0)
+                ? nombreCompleto.substring(ultimoEspacio + 1).toLowerCase()
+                : nombreCompleto.toLowerCase();
+        }
+
         cmbTutor = new JComboBox<>();
         cmbTutor.addItem(null);
-        for (Tutor t : tutorDAO.listarTodos()) cmbTutor.addItem(t);
+        for (Tutor t : tutorDAO.listarTodos()) {
+            Alumno alumnoDelTutor = alumnoDAO.buscarPorTutorId(t.getId());
+            if (alumnoDelTutor == null) {
+                // Tutor sin alumno asignado: siempre disponible
+                cmbTutor.addItem(t);
+            } else if (alumno != null && alumnoDelTutor.getId() == alumno.getId()) {
+                // El tutor ya está asignado a este mismo alumno (modo edición)
+                cmbTutor.addItem(t);
+            } else if (!apellidoActual.isEmpty()) {
+                // Verificar si el alumno asignado comparte apellido (hermanos)
+                String nombreAsignado = alumnoDelTutor.getNombre().trim();
+                int lastSpace = nombreAsignado.lastIndexOf(' ');
+                String apellidoAsignado = (lastSpace >= 0)
+                    ? nombreAsignado.substring(lastSpace + 1).toLowerCase()
+                    : nombreAsignado.toLowerCase();
+                if (apellidoActual.equals(apellidoAsignado)) {
+                    cmbTutor.addItem(t);
+                }
+            }
+            // Tutor con alumno asignado de diferente apellido: no se muestra
+        }
         estilizarCombo(cmbTutor, "Sin tutor");
 
         lblError = new JLabel(" ");

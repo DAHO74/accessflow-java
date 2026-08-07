@@ -37,6 +37,20 @@ public class GrupoDAO {
         return null;
     }
 
+    public boolean existeConNombre(String nombre, int excludeId) {
+        String sql = "SELECT COUNT(*) FROM Grupo WHERE nombre = ? AND id != ?";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nombre);
+            ps.setInt(2, excludeId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean insertar(Grupo g) {
         String sql = "INSERT INTO Grupo (nombre, grado, turno) VALUES (?, ?, ?)";
         try (Connection con = Conexion.obtener();

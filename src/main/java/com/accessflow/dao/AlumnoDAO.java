@@ -56,6 +56,19 @@ public class AlumnoDAO {
         return null;
     }
 
+    public Alumno buscarPorTutorId(int tutorId) {
+        String sql = SELECT_BASE + "WHERE a.tutor_id = ? LIMIT 1";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, tutorId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return mapear(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public boolean insertar(Alumno a) {
         String sql = "INSERT INTO Alumno (nombre, rfid_uid, grupo_id, tutor_id) VALUES (?, ?, ?, ?)";
         try (Connection con = Conexion.obtener();

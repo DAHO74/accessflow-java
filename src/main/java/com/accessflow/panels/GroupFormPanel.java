@@ -155,6 +155,12 @@ public class GroupFormPanel extends JPanel {
         String turno = (String) cmbTurno.getSelectedItem();
         if (turno != null && turno.isEmpty()) turno = null;
 
+        int idActual = (grupo == null) ? 0 : grupo.getId();
+        if (grupoDAO.existeConNombre(nombre, idActual)) {
+            lblError.setText("Ya existe un grupo con ese nombre.");
+            return;
+        }
+
         boolean exito;
         if (grupo == null) {
             Grupo nuevo = new Grupo(nombre, grado, turno);
