@@ -152,27 +152,22 @@ public class AttendancePanel extends JPanel {
             return;
         }
 
-        Asistencia hoy = asistenciaDAO.buscarAsistenciaHoy(alumno.getId());
+        Asistencia sesionActiva = asistenciaDAO.buscarSesionActiva(alumno.getId());
 
-        if (hoy == null) {
-            // Sin registro hoy → entrada
-            boolean ok = asistenciaDAO.registrarEntrada(alumno.getId());
-            if (ok) {
-                mostrarMensaje("Entrada registrada: " + alumno.getNombre(), Colores.VERDE);
-            } else {
-                mostrarMensaje("Error al registrar entrada.", Colores.ROJO);
-            }
-        } else if (hoy.getFechaSalida() == null) {
-            // Ya tiene entrada pero no salida → salida
-            boolean ok = asistenciaDAO.registrarSalida(hoy.getId());
+        if (sesionActiva != null) {
+            boolean ok = asistenciaDAO.registrarSalida(sesionActiva.getId());
             if (ok) {
                 mostrarMensaje("Salida registrada: " + alumno.getNombre(), Colores.AZUL_PRIMARIO);
             } else {
                 mostrarMensaje("Error al registrar salida.", Colores.ROJO);
             }
         } else {
-            // Asistencia completa
-            mostrarMensaje(alumno.getNombre() + " ya tiene asistencia completa hoy.", Colores.TEXTO_GRIS);
+            boolean ok = asistenciaDAO.registrarEntrada(alumno.getId());
+            if (ok) {
+                mostrarMensaje("Entrada registrada: " + alumno.getNombre(), Colores.VERDE);
+            } else {
+                mostrarMensaje("Error al registrar entrada.", Colores.ROJO);
+            }
         }
 
         campoRfid.setText("");

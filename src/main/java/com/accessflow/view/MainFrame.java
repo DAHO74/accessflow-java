@@ -143,7 +143,7 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel construirSidebarNav() {
-        btnDashboard  = crearNavBtn("  Dashboard");
+        btnDashboard  = crearNavBtn("  Inicio");
         btnAsistencia = crearNavBtn("  Asistencia");
         btnHistorial  = crearNavBtn("  Historial");
         btnAlumnos    = crearNavBtn("  Alumnos");

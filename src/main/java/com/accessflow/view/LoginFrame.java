@@ -96,16 +96,6 @@ public class LoginFrame extends JFrame {
         btnLogin = crearBotonPrimario("Iniciar Sesión");
         btnLogin.addActionListener(e -> iniciarSesion());
 
-        JButton btnRegistro = new JButton("Crear cuenta de administrador");
-        btnRegistro.setBackground(null);
-        btnRegistro.setForeground(Colores.AZUL_PRIMARIO);
-        btnRegistro.setBorderPainted(false);
-        btnRegistro.setContentAreaFilled(false);
-        btnRegistro.setFont(Colores.FUENTE_PEQUEÑA);
-        btnRegistro.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnRegistro.addActionListener(e -> mostrarDialogoRegistro());
-
         // ── Ensamblar ─────────────────────────────────
         card.add(logo);
         card.add(Box.createVerticalStrut(10));
@@ -124,8 +114,6 @@ public class LoginFrame extends JFrame {
         card.add(etiquetaError);
         card.add(Box.createVerticalStrut(6));
         card.add(btnLogin);
-        card.add(Box.createVerticalStrut(10));
-        card.add(btnRegistro);
 
         return card;
     }

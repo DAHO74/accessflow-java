@@ -2,10 +2,8 @@ package com.accessflow.panels;
 
 import com.accessflow.dao.AlumnoDAO;
 import com.accessflow.dao.GrupoDAO;
-import com.accessflow.dao.TutorDAO;
 import com.accessflow.model.Alumno;
 import com.accessflow.model.Grupo;
-import com.accessflow.model.Tutor;
 import com.accessflow.util.Colores;
 import com.accessflow.util.Componentes;
 import com.accessflow.view.MainFrame;
@@ -22,12 +20,10 @@ public class StudentFormPanel extends JPanel {
 
     private final AlumnoDAO alumnoDAO = new AlumnoDAO();
     private final GrupoDAO  grupoDAO  = new GrupoDAO();
-    private final TutorDAO  tutorDAO  = new TutorDAO();
 
     private JTextField       campoNombre;
     private JTextField       campoRfid;
     private JComboBox<Grupo> cmbGrupo;
-    private JComboBox<Tutor> cmbTutor;
     private JLabel           lblError;
 
     public StudentFormPanel(MainFrame mainFrame, Alumno alumno) {
@@ -93,41 +89,6 @@ public class StudentFormPanel extends JPanel {
         for (Grupo g : grupoDAO.listarTodos()) cmbGrupo.addItem(g);
         estilizarCombo(cmbGrupo, "Sin grupo");
 
-        // Apellido del alumno actual (última palabra del nombre) para detectar hermanos
-        String apellidoActual = "";
-        if (alumno != null) {
-            String nombreCompleto = alumno.getNombre().trim();
-            int ultimoEspacio = nombreCompleto.lastIndexOf(' ');
-            apellidoActual = (ultimoEspacio >= 0)
-                ? nombreCompleto.substring(ultimoEspacio + 1).toLowerCase()
-                : nombreCompleto.toLowerCase();
-        }
-
-        cmbTutor = new JComboBox<>();
-        cmbTutor.addItem(null);
-        for (Tutor t : tutorDAO.listarTodos()) {
-            Alumno alumnoDelTutor = alumnoDAO.buscarPorTutorId(t.getId());
-            if (alumnoDelTutor == null) {
-                // Tutor sin alumno asignado: siempre disponible
-                cmbTutor.addItem(t);
-            } else if (alumno != null && alumnoDelTutor.getId() == alumno.getId()) {
-                // El tutor ya está asignado a este mismo alumno (modo edición)
-                cmbTutor.addItem(t);
-            } else if (!apellidoActual.isEmpty()) {
-                // Verificar si el alumno asignado comparte apellido (hermanos)
-                String nombreAsignado = alumnoDelTutor.getNombre().trim();
-                int lastSpace = nombreAsignado.lastIndexOf(' ');
-                String apellidoAsignado = (lastSpace >= 0)
-                    ? nombreAsignado.substring(lastSpace + 1).toLowerCase()
-                    : nombreAsignado.toLowerCase();
-                if (apellidoActual.equals(apellidoAsignado)) {
-                    cmbTutor.addItem(t);
-                }
-            }
-            // Tutor con alumno asignado de diferente apellido: no se muestra
-        }
-        estilizarCombo(cmbTutor, "Sin tutor");
-
         lblError = new JLabel(" ");
         lblError.setFont(Colores.FUENTE_PEQUEÑA);
         lblError.setForeground(Colores.ROJO);
@@ -157,10 +118,6 @@ public class StudentFormPanel extends JPanel {
         card.add(crearEtiqueta("Grupo"));
         card.add(Box.createVerticalStrut(5));
         card.add(cmbGrupo);
-        card.add(Box.createVerticalStrut(14));
-        card.add(crearEtiqueta("Tutor responsable"));
-        card.add(Box.createVerticalStrut(5));
-        card.add(cmbTutor);
         card.add(Box.createVerticalStrut(12));
         card.add(lblError);
         card.add(Box.createVerticalStrut(8));
@@ -186,16 +143,6 @@ public class StudentFormPanel extends JPanel {
                 }
             }
         }
-
-        if (alumno.getTutorId() > 0) {
-            for (int i = 0; i < cmbTutor.getItemCount(); i++) {
-                Tutor t = cmbTutor.getItemAt(i);
-                if (t != null && t.getId() == alumno.getTutorId()) {
-                    cmbTutor.setSelectedIndex(i);
-                    break;
-                }
-            }
-        }
     }
 
     private void guardar() {
@@ -212,9 +159,8 @@ public class StudentFormPanel extends JPanel {
         Grupo grupoSel = (Grupo) cmbGrupo.getSelectedItem();
         if (grupoSel != null) grupoId = grupoSel.getId();
 
-        int tutorId = 0;
-        Tutor tutorSel = (Tutor) cmbTutor.getSelectedItem();
-        if (tutorSel != null) tutorId = tutorSel.getId();
+        // El tutor se gestiona desde el panel de tutores; se preserva el existente
+        int tutorId = (alumno != null) ? alumno.getTutorId() : 0;
 
         boolean exito;
         if (alumno == null) {
@@ -223,7 +169,6 @@ public class StudentFormPanel extends JPanel {
             alumno.setNombre(nombre);
             alumno.setRfidUid(rfid);
             alumno.setGrupoId(grupoId);
-            alumno.setTutorId(tutorId);
             exito = alumnoDAO.actualizar(alumno);
         }
 

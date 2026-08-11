@@ -8,6 +8,7 @@ import com.accessflow.view.MainFrame;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.File;
 
 public class SettingsPanel extends JPanel {
 
@@ -119,6 +120,40 @@ public class SettingsPanel extends JPanel {
         panelBotones.add(btnProbar);
         panelBotones.add(btnGuardar);
 
+        // ── Sección de respaldo ──────────────────────────
+        JSeparator sep = new JSeparator();
+        sep.setForeground(Colores.BORDE);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        sep.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblSeccionRespaldo = new JLabel("Respaldo de base de datos");
+        lblSeccionRespaldo.setFont(Colores.FUENTE_BOLD);
+        lblSeccionRespaldo.setForeground(Colores.TEXTO_CLARO);
+        lblSeccionRespaldo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblNotaRespaldo = new JLabel(
+            "<html>Genera un archivo .sql con toda la información del sistema. " +
+            "Requiere que <b>mysqldump</b> esté disponible en el sistema.</html>"
+        );
+        lblNotaRespaldo.setFont(Colores.FUENTE_PEQUEÑA);
+        lblNotaRespaldo.setForeground(Colores.TEXTO_GRIS);
+        lblNotaRespaldo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblNotaRespaldo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        JLabel lblEstadoRespaldo = new JLabel(" ");
+        lblEstadoRespaldo.setFont(Colores.FUENTE_PEQUEÑA);
+        lblEstadoRespaldo.setForeground(Colores.TEXTO_GRIS);
+        lblEstadoRespaldo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblEstadoRespaldo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+
+        JButton btnRespaldo = Componentes.botonSecundario("Generar respaldo (.sql)");
+        JPanel panelRespaldo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panelRespaldo.setBackground(Colores.FONDO_PANEL);
+        panelRespaldo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelRespaldo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelRespaldo.add(btnRespaldo);
+        btnRespaldo.addActionListener(e -> generarRespaldo(lblEstadoRespaldo));
+
         card.add(lblSeccion);
         card.add(Box.createVerticalStrut(6));
         card.add(lblNota);
@@ -136,6 +171,16 @@ public class SettingsPanel extends JPanel {
         card.add(lblEstado);
         card.add(Box.createVerticalStrut(8));
         card.add(panelBotones);
+        card.add(Box.createVerticalStrut(20));
+        card.add(sep);
+        card.add(Box.createVerticalStrut(14));
+        card.add(lblSeccionRespaldo);
+        card.add(Box.createVerticalStrut(6));
+        card.add(lblNotaRespaldo);
+        card.add(Box.createVerticalStrut(10));
+        card.add(panelRespaldo);
+        card.add(Box.createVerticalStrut(6));
+        card.add(lblEstadoRespaldo);
 
         return card;
     }
@@ -202,6 +247,52 @@ public class SettingsPanel extends JPanel {
     private void mostrarEstado(String texto, Color color) {
         lblEstado.setText(texto);
         lblEstado.setForeground(color);
+    }
+
+    private void generarRespaldo(JLabel lblEstadoRespaldo) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Guardar respaldo como...");
+        chooser.setSelectedFile(new java.io.File("accessflow_backup_" +
+            java.time.LocalDate.now().toString().replace("-", "") + ".sql"));
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivo SQL (*.sql)", "sql"));
+
+        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+        java.io.File destino = chooser.getSelectedFile();
+        if (!destino.getName().endsWith(".sql")) {
+            destino = new java.io.File(destino.getAbsolutePath() + ".sql");
+        }
+
+        final java.io.File archivoFinal = destino;
+        lblEstadoRespaldo.setText("Generando respaldo...");
+        lblEstadoRespaldo.setForeground(Colores.TEXTO_GRIS);
+
+        new Thread(() -> {
+            try {
+                ProcessBuilder pb = new ProcessBuilder(
+                    "mysqldump", "-u", "root", "--password=", "accessflow_db"
+                );
+                pb.redirectOutput(archivoFinal);
+                pb.redirectErrorStream(false);
+                Process proceso = pb.start();
+                int code = proceso.waitFor();
+
+                SwingUtilities.invokeLater(() -> {
+                    if (code == 0) {
+                        lblEstadoRespaldo.setText("Respaldo guardado en: " + archivoFinal.getName());
+                        lblEstadoRespaldo.setForeground(Colores.VERDE);
+                    } else {
+                        lblEstadoRespaldo.setText("Error al ejecutar mysqldump (código " + code + ").");
+                        lblEstadoRespaldo.setForeground(Colores.ROJO);
+                    }
+                });
+            } catch (Exception ex) {
+                SwingUtilities.invokeLater(() -> {
+                    lblEstadoRespaldo.setText("No se encontró mysqldump en el sistema.");
+                    lblEstadoRespaldo.setForeground(Colores.ROJO);
+                });
+            }
+        }).start();
     }
 
     // ── Auxiliares de estilo ─────────────────────────

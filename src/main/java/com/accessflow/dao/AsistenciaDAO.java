@@ -54,6 +54,25 @@ public class AsistenciaDAO {
         return null;
     }
 
+    public Asistencia buscarSesionActiva(int alumnoId) {
+        String sql = "SELECT * FROM Asistencia WHERE alumno_id = ? AND fecha_salida IS NULL " +
+                     "ORDER BY fecha_entrada DESC LIMIT 1";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, alumnoId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Asistencia a = new Asistencia();
+                a.setId(rs.getInt("id"));
+                a.setAlumnoId(rs.getInt("alumno_id"));
+                Timestamp ts = rs.getTimestamp("fecha_entrada");
+                if (ts != null) a.setFechaEntrada(ts.toLocalDateTime());
+                return a;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
     public boolean registrarEntrada(int alumnoId) {
         String sql = "INSERT INTO Asistencia (alumno_id, fecha_entrada) VALUES (?, NOW())";
         try (Connection con = Conexion.obtener();

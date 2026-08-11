@@ -69,6 +69,45 @@ public class AlumnoDAO {
         return null;
     }
 
+    public List<Alumno> listarPorTutorId(int tutorId) {
+        List<Alumno> lista = new ArrayList<>();
+        String sql = SELECT_BASE + "WHERE a.tutor_id = ? ORDER BY a.nombre";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, tutorId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) lista.add(mapear(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    public void asignarAlumnos(int tutorId, java.util.List<Integer> alumnoIds) {
+        try (Connection con = Conexion.obtener()) {
+            // Quitar asignación previa de este tutor
+            try (PreparedStatement ps = con.prepareStatement(
+                    "UPDATE Alumno SET tutor_id = NULL WHERE tutor_id = ?")) {
+                ps.setInt(1, tutorId);
+                ps.executeUpdate();
+            }
+            // Asignar los seleccionados
+            if (!alumnoIds.isEmpty()) {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "UPDATE Alumno SET tutor_id = ? WHERE id = ?")) {
+                    for (int alumnoId : alumnoIds) {
+                        ps.setInt(1, tutorId);
+                        ps.setInt(2, alumnoId);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean insertar(Alumno a) {
         String sql = "INSERT INTO Alumno (nombre, rfid_uid, grupo_id, tutor_id) VALUES (?, ?, ?, ?)";
         try (Connection con = Conexion.obtener();

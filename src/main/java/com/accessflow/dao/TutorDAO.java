@@ -38,18 +38,27 @@ public class TutorDAO {
     }
 
     public boolean insertar(Tutor t) {
+        return insertarConId(t) > 0;
+    }
+
+    public int insertarConId(Tutor t) {
         String sql = "INSERT INTO Tutor (nombre, email, telefono) VALUES (?, ?, ?)";
         try (Connection con = Conexion.obtener();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, t.getNombre());
             ps.setString(2, t.getEmail());
             ps.setString(3, t.getTelefono());
             ps.executeUpdate();
-            return true;
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                int id = rs.getInt(1);
+                t.setId(id);
+                return id;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return -1;
     }
 
     public boolean actualizar(Tutor t) {

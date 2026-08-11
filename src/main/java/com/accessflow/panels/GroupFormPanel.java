@@ -12,15 +12,18 @@ import java.awt.*;
 
 public class GroupFormPanel extends JPanel {
 
+    private static final String[] LETRAS = {"A","B","C","D","E","F","G","H","I","J","K","L"};
+    private static final String[] GRADOS = {"1°","2°","3°"};
+
     private final MainFrame mainFrame;
-    private final Grupo     grupo;     // null cuando se crea un nuevo grupo
+    private final Grupo     grupo;
 
     private final GrupoDAO grupoDAO = new GrupoDAO();
 
-    private JTextField       campoNombre;
-    private JTextField       campoGrado;
-    private JComboBox<String> cmbTurno;
-    private JLabel           lblError;
+    private JComboBox<String> cmbLetra;
+    private JComboBox<String> cmbGrado;
+    private JLabel            lblTurno;
+    private JLabel            lblError;
 
     public GroupFormPanel(MainFrame mainFrame, Grupo grupo) {
         this.mainFrame = mainFrame;
@@ -75,15 +78,27 @@ public class GroupFormPanel extends JPanel {
             new EmptyBorder(32, 32, 32, 32)
         ));
 
-        campoNombre = new JTextField();
-        campoGrado  = new JTextField();
-        Componentes.estilizarCampo(campoNombre);
-        Componentes.estilizarCampo(campoGrado);
+        cmbLetra = new JComboBox<>(LETRAS);
+        estilizarComboBox(cmbLetra, "Seleccionar letra...");
+        cmbLetra.setSelectedIndex(-1);
+        cmbLetra.addActionListener(e -> actualizarTurno());
 
-        // ComboBox con los turnos más comunes
-        String[] opciones = {"", "Matutino", "Vespertino"};
-        cmbTurno = new JComboBox<>(opciones);
-        estilizarComboBox(cmbTurno);
+        cmbGrado = new JComboBox<>(GRADOS);
+        estilizarComboBox(cmbGrado, "Seleccionar grado...");
+        cmbGrado.setSelectedIndex(-1);
+
+        // Turno: solo lectura, se rellena automáticamente según la letra
+        lblTurno = new JLabel("—");
+        lblTurno.setFont(Colores.FUENTE_NORMAL);
+        lblTurno.setForeground(Colores.TEXTO_CLARO);
+        lblTurno.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblTurno.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(0x2D, 0x3A, 0x4A)),
+            new EmptyBorder(8, 10, 8, 10)
+        ));
+        lblTurno.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        lblTurno.setOpaque(true);
+        lblTurno.setBackground(new Color(0x1A, 0x24, 0x2F));
 
         lblError = new JLabel(" ");
         lblError.setFont(Colores.FUENTE_PEQUEÑA);
@@ -103,17 +118,17 @@ public class GroupFormPanel extends JPanel {
         panelBotones.add(btnCancelar);
         panelBotones.add(btnGuardar);
 
-        card.add(crearEtiqueta("Nombre del grupo *"));
+        card.add(crearEtiqueta("Letra del grupo *"));
         card.add(Box.createVerticalStrut(5));
-        card.add(campoNombre);
+        card.add(cmbLetra);
         card.add(Box.createVerticalStrut(16));
-        card.add(crearEtiqueta("Grado  (ej. 1°, 2°, 3°)"));
+        card.add(crearEtiqueta("Grado *"));
         card.add(Box.createVerticalStrut(5));
-        card.add(campoGrado);
+        card.add(cmbGrado);
         card.add(Box.createVerticalStrut(16));
-        card.add(crearEtiqueta("Turno"));
+        card.add(crearEtiqueta("Turno  (se asigna automáticamente)"));
         card.add(Box.createVerticalStrut(5));
-        card.add(cmbTurno);
+        card.add(lblTurno);
         card.add(Box.createVerticalStrut(14));
         card.add(lblError);
         card.add(Box.createVerticalStrut(8));
@@ -126,47 +141,67 @@ public class GroupFormPanel extends JPanel {
     //  LÓGICA
     // ═══════════════════════════════════════════════
 
-    private void llenarFormulario() {
-        campoNombre.setText(grupo.getNombre());
-        campoGrado.setText(grupo.getGrado() != null ? grupo.getGrado() : "");
+    private void actualizarTurno() {
+        String letra = (String) cmbLetra.getSelectedItem();
+        if (letra == null) {
+            lblTurno.setText("—");
+            return;
+        }
+        boolean esMatutino = "ABCDEF".contains(letra);
+        lblTurno.setText(esMatutino ? "Matutino" : "Vespertino");
+        lblTurno.setForeground(esMatutino ? Colores.VERDE : Colores.AZUL_PRIMARIO);
+    }
 
-        // Seleccionar el turno en el ComboBox
-        String turno = grupo.getTurno();
-        if (turno != null) {
-            for (int i = 0; i < cmbTurno.getItemCount(); i++) {
-                if (cmbTurno.getItemAt(i).equals(turno)) {
-                    cmbTurno.setSelectedIndex(i);
+    private void llenarFormulario() {
+        // Seleccionar letra
+        String nombre = grupo.getNombre();
+        if (nombre != null) {
+            for (int i = 0; i < LETRAS.length; i++) {
+                if (LETRAS[i].equals(nombre.toUpperCase())) {
+                    cmbLetra.setSelectedIndex(i);
                     break;
                 }
             }
         }
+        // Seleccionar grado
+        String grado = grupo.getGrado();
+        if (grado != null) {
+            for (int i = 0; i < GRADOS.length; i++) {
+                if (GRADOS[i].equals(grado)) {
+                    cmbGrado.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        actualizarTurno();
     }
 
     private void guardar() {
-        String nombre = campoNombre.getText().trim();
-        if (nombre.isEmpty()) {
-            lblError.setText("El nombre del grupo es obligatorio.");
+        String letra = (String) cmbLetra.getSelectedItem();
+        if (letra == null) {
+            lblError.setText("Selecciona la letra del grupo.");
+            return;
+        }
+        String grado = (String) cmbGrado.getSelectedItem();
+        if (grado == null) {
+            lblError.setText("Selecciona el grado.");
             return;
         }
 
-        String grado = campoGrado.getText().trim();
-        if (grado.isEmpty()) grado = null;
-
-        String turno = (String) cmbTurno.getSelectedItem();
-        if (turno != null && turno.isEmpty()) turno = null;
+        String turno = lblTurno.getText();
+        if ("—".equals(turno)) turno = null;
 
         int idActual = (grupo == null) ? 0 : grupo.getId();
-        if (grupoDAO.existeConNombre(nombre, idActual)) {
-            lblError.setText("Ya existe un grupo con ese nombre.");
+        if (grupoDAO.existeConNombre(letra, idActual)) {
+            lblError.setText("Ya existe un grupo con esa letra.");
             return;
         }
 
         boolean exito;
         if (grupo == null) {
-            Grupo nuevo = new Grupo(nombre, grado, turno);
-            exito = grupoDAO.insertar(nuevo);
+            exito = grupoDAO.insertar(new Grupo(letra, grado, turno));
         } else {
-            grupo.setNombre(nombre);
+            grupo.setNombre(letra);
             grupo.setGrado(grado);
             grupo.setTurno(turno);
             exito = grupoDAO.actualizar(grupo);
@@ -189,7 +224,7 @@ public class GroupFormPanel extends JPanel {
         return lbl;
     }
 
-    private void estilizarComboBox(JComboBox<String> combo) {
+    private void estilizarComboBox(JComboBox<String> combo, String placeholder) {
         combo.setBackground(Colores.FONDO_OSCURO);
         combo.setForeground(Colores.TEXTO_CLARO);
         combo.setFont(Colores.FUENTE_NORMAL);
@@ -204,11 +239,10 @@ public class GroupFormPanel extends JPanel {
             public Component getListCellRendererComponent(JList<?> list, Object value,
                     int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                String texto = (value == null || value.toString().isEmpty())
-                               ? "Seleccionar turno..." : value.toString();
+                String texto = (value == null) ? placeholder : value.toString();
                 setText(texto);
                 setBackground(isSelected ? Colores.AZUL_PRIMARIO : Colores.FONDO_OSCURO);
-                setForeground(Colores.TEXTO_CLARO);
+                setForeground(value == null ? Colores.TEXTO_GRIS : Colores.TEXTO_CLARO);
                 setBorder(new EmptyBorder(4, 8, 4, 8));
                 return this;
             }
