@@ -27,10 +27,11 @@ CREATE TABLE Grupo (
 
 -- Tutores (padres o madres de familia) — debe ir ANTES de Alumno
 CREATE TABLE Tutor (
-    id       INT          AUTO_INCREMENT PRIMARY KEY,
-    nombre   VARCHAR(100) NOT NULL,
-    email    VARCHAR(150),
-    telefono VARCHAR(20)
+    id         INT          AUTO_INCREMENT PRIMARY KEY,
+    nombre     VARCHAR(100) NOT NULL,
+    email      VARCHAR(150),
+    telefono   VARCHAR(20),
+    parentesco VARCHAR(50)
 );
 
 -- Alumnos registrados en el sistema

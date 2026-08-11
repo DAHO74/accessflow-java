@@ -42,12 +42,13 @@ public class TutorDAO {
     }
 
     public int insertarConId(Tutor t) {
-        String sql = "INSERT INTO Tutor (nombre, email, telefono) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Tutor (nombre, email, telefono, parentesco) VALUES (?, ?, ?, ?)";
         try (Connection con = Conexion.obtener();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, t.getNombre());
             ps.setString(2, t.getEmail());
             ps.setString(3, t.getTelefono());
+            ps.setString(4, t.getParentesco());
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
@@ -62,13 +63,14 @@ public class TutorDAO {
     }
 
     public boolean actualizar(Tutor t) {
-        String sql = "UPDATE Tutor SET nombre = ?, email = ?, telefono = ? WHERE id = ?";
+        String sql = "UPDATE Tutor SET nombre = ?, email = ?, telefono = ?, parentesco = ? WHERE id = ?";
         try (Connection con = Conexion.obtener();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getNombre());
             ps.setString(2, t.getEmail());
             ps.setString(3, t.getTelefono());
-            ps.setInt(4, t.getId());
+            ps.setString(4, t.getParentesco());
+            ps.setInt(5, t.getId());
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -108,6 +110,7 @@ public class TutorDAO {
         t.setNombre(rs.getString("nombre"));
         t.setEmail(rs.getString("email"));
         t.setTelefono(rs.getString("telefono"));
+        t.setParentesco(rs.getString("parentesco"));
         return t;
     }
 }

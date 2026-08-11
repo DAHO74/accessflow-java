@@ -10,7 +10,7 @@ import java.util.List;
 public class AlumnoDAO {
 
     private static final String SELECT_BASE =
-        "SELECT a.*, g.nombre AS grupo_nombre, t.nombre AS tutor_nombre " +
+        "SELECT a.*, g.nombre AS grupo_nombre, g.grado AS grupo_grado, t.nombre AS tutor_nombre " +
         "FROM Alumno a " +
         "LEFT JOIN Grupo g ON a.grupo_id = g.id " +
         "LEFT JOIN Tutor t ON a.tutor_id = t.id ";
@@ -184,6 +184,7 @@ public class AlumnoDAO {
         a.setGrupoId(rs.getInt("grupo_id"));
         a.setTutorId(rs.getInt("tutor_id"));
         a.setGrupoNombre(rs.getString("grupo_nombre"));
+        a.setGrupoGrado(rs.getString("grupo_grado"));
         a.setTutorNombre(rs.getString("tutor_nombre"));
         return a;
     }

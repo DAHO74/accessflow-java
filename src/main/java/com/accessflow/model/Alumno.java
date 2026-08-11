@@ -8,6 +8,7 @@ public class Alumno {
     private int    grupoId;
     private int    tutorId;
     private String grupoNombre;  // para mostrar en tablas
+    private String grupoGrado;   // para mostrar en tablas
     private String tutorNombre;  // para mostrar en tablas
 
     public Alumno() {}
@@ -31,6 +32,8 @@ public class Alumno {
     public void setTutorId(int tutorId)        { this.tutorId = tutorId; }
     public String getGrupoNombre()             { return grupoNombre; }
     public void setGrupoNombre(String nombre)  { this.grupoNombre = nombre; }
+    public String getGrupoGrado()              { return grupoGrado; }
+    public void setGrupoGrado(String grado)    { this.grupoGrado = grado; }
     public String getTutorNombre()             { return tutorNombre; }
     public void setTutorNombre(String nombre)  { this.tutorNombre = nombre; }
 
