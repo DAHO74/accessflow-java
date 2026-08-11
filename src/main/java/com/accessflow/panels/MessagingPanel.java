@@ -25,78 +25,82 @@ public class MessagingPanel extends JPanel {
     private final TutorDAO   tutorDAO   = new TutorDAO();
     private final MensajeDAO mensajeDAO = new MensajeDAO();
 
+    // ── Pestaña Redactar ─────────────────────────────
     private JTextField         campoBuscarTutor;
     private JList<Tutor>       listaTutores;
     private DefaultListModel<Tutor> modeloTutores;
-    private JLabel             lblTutorSeleccionado;
-
+    private JLabel             lblTutorSel;
     private JTextField         campoAsunto;
     private JTextArea          areaCuerpo;
     private JLabel             lblEstado;
+
+    // ── Pestaña Historial ────────────────────────────
+    private JTextField         campoBuscarHistorial;
     private JTable             tabla;
     private DefaultTableModel  modeloTabla;
+    private List<Mensaje>      todosMensajes = new ArrayList<>();
 
-    private final List<Tutor> todosTutores = new ArrayList<>();
+    // ── Tutores ──────────────────────────────────────
+    private final List<Tutor>  todosTutores  = new ArrayList<>();
 
     public MessagingPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout(0, 14));
         setBackground(Colores.FONDO_OSCURO);
 
-        add(construirNorte(), BorderLayout.NORTH);
-        add(construirTabla(), BorderLayout.CENTER);
-
-        cargarHistorial();
-    }
-
-    // ═══════════════════════════════════════════════
-    //  INTERFAZ
-    // ═══════════════════════════════════════════════
-
-    private JPanel construirNorte() {
-        JPanel norte = new JPanel();
-        norte.setLayout(new BoxLayout(norte, BoxLayout.Y_AXIS));
-        norte.setBackground(Colores.FONDO_OSCURO);
-
-        JPanel fila1 = new JPanel(new BorderLayout());
-        fila1.setBackground(Colores.FONDO_OSCURO);
-        fila1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        // Título
         JLabel titulo = new JLabel("Mensajería");
         titulo.setFont(Colores.FUENTE_TITULO);
         titulo.setForeground(Colores.TEXTO_CLARO);
-        fila1.add(titulo, BorderLayout.WEST);
+        titulo.setBorder(new EmptyBorder(0, 0, 10, 0));
+        add(titulo, BorderLayout.NORTH);
 
-        // ── Card principal ────────────────────────────
-        JPanel card = new JPanel(new BorderLayout(14, 10));
-        card.setBackground(Colores.FONDO_PANEL);
-        card.setBorder(BorderFactory.createCompoundBorder(
+        // Tabs
+        JTabbedPane tabs = new JTabbedPane();
+        estilizarTabs(tabs);
+        tabs.addTab("  Redactar  ", construirTabRedactar());
+        tabs.addTab("  Historial  ", construirTabHistorial());
+        tabs.addChangeListener(e -> {
+            if (tabs.getSelectedIndex() == 1) cargarHistorial();
+        });
+        add(tabs, BorderLayout.CENTER);
+
+        cargarTutores();
+    }
+
+    // ═══════════════════════════════════════════════
+    //  TAB: REDACTAR
+    // ═══════════════════════════════════════════════
+
+    private JPanel construirTabRedactar() {
+        JPanel panel = new JPanel(new BorderLayout(16, 0));
+        panel.setBackground(Colores.FONDO_OSCURO);
+        panel.setBorder(new EmptyBorder(16, 0, 0, 0));
+
+        panel.add(construirPanelTutor(),  BorderLayout.WEST);
+        panel.add(construirPanelMensaje(), BorderLayout.CENTER);
+        return panel;
+    }
+
+    // ── Columna izquierda: búsqueda de tutor ─────────
+
+    private JPanel construirPanelTutor() {
+        JPanel panel = new JPanel(new BorderLayout(0, 8));
+        panel.setBackground(Colores.FONDO_PANEL);
+        panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Colores.BORDE),
-            new EmptyBorder(14, 16, 14, 16)
+            new EmptyBorder(16, 16, 16, 16)
         ));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
-        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setPreferredSize(new Dimension(320, 0));
 
-        // ── Columna izquierda: buscador de tutor ──────
-        JPanel colTutor = new JPanel(new BorderLayout(0, 6));
-        colTutor.setBackground(Colores.FONDO_PANEL);
-        colTutor.setPreferredSize(new Dimension(300, 0));
+        // Cabecera
+        JLabel lblTit = new JLabel("Tutor destinatario");
+        lblTit.setFont(Colores.FUENTE_BOLD);
+        lblTit.setForeground(Colores.TEXTO_CLARO);
 
-        JPanel cabTutor = new JPanel(new BorderLayout(0, 4));
-        cabTutor.setBackground(Colores.FONDO_PANEL);
-
-        JLabel lblTitTutor = new JLabel("Tutor destinatario");
-        lblTitTutor.setFont(Colores.FUENTE_PEQUEÑA);
-        lblTitTutor.setForeground(Colores.TEXTO_GRIS);
-
-        lblTutorSeleccionado = new JLabel("Ninguno seleccionado");
-        lblTutorSeleccionado.setFont(Colores.FUENTE_PEQUEÑA);
-        lblTutorSeleccionado.setForeground(Colores.TEXTO_GRIS);
-        lblTutorSeleccionado.setHorizontalAlignment(SwingConstants.RIGHT);
-
-        JPanel filaTitTutor = new JPanel(new BorderLayout());
-        filaTitTutor.setBackground(Colores.FONDO_PANEL);
-        filaTitTutor.add(lblTitTutor,          BorderLayout.WEST);
-        filaTitTutor.add(lblTutorSeleccionado, BorderLayout.EAST);
+        lblTutorSel = new JLabel("Ninguno seleccionado");
+        lblTutorSel.setFont(Colores.FUENTE_PEQUEÑA);
+        lblTutorSel.setForeground(Colores.TEXTO_GRIS);
 
         campoBuscarTutor = new JTextField();
         campoBuscarTutor.setBackground(Colores.FONDO_OSCURO);
@@ -105,7 +109,7 @@ public class MessagingPanel extends JPanel {
         campoBuscarTutor.setFont(Colores.FUENTE_NORMAL);
         campoBuscarTutor.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Colores.BORDE),
-            new EmptyBorder(5, 8, 5, 8)
+            new EmptyBorder(6, 10, 6, 10)
         ));
         campoBuscarTutor.setToolTipText("Buscar por nombre o correo...");
         campoBuscarTutor.getDocument().addDocumentListener(new DocumentListener() {
@@ -114,43 +118,60 @@ public class MessagingPanel extends JPanel {
             public void changedUpdate(DocumentEvent e) { filtrarTutores(); }
         });
 
-        cabTutor.add(filaTitTutor,    BorderLayout.NORTH);
-        cabTutor.add(campoBuscarTutor, BorderLayout.SOUTH);
+        JPanel cabecera = new JPanel();
+        cabecera.setLayout(new BoxLayout(cabecera, BoxLayout.Y_AXIS));
+        cabecera.setBackground(Colores.FONDO_PANEL);
+        cabecera.add(lblTit);
+        cabecera.add(Box.createVerticalStrut(4));
+        cabecera.add(lblTutorSel);
+        cabecera.add(Box.createVerticalStrut(10));
+        cabecera.add(campoBuscarTutor);
 
+        // Lista
         modeloTutores = new DefaultListModel<>();
         listaTutores  = new JList<>(modeloTutores);
         listaTutores.setBackground(Colores.FONDO_OSCURO);
         listaTutores.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        listaTutores.setFixedCellHeight(42);
+        listaTutores.setFixedCellHeight(46);
         listaTutores.setCellRenderer(new TutorCellRenderer());
         listaTutores.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) actualizarTutorSeleccionado();
+            if (!e.getValueIsAdjusting()) actualizarTutorSel();
         });
 
-        JScrollPane scrollTutores = new JScrollPane(listaTutores);
-        scrollTutores.setBorder(BorderFactory.createLineBorder(Colores.BORDE));
-        scrollTutores.setBackground(Colores.FONDO_OSCURO);
-        scrollTutores.getViewport().setBackground(Colores.FONDO_OSCURO);
-        scrollTutores.getVerticalScrollBar().setUnitIncrement(16);
+        JScrollPane scroll = new JScrollPane(listaTutores);
+        scroll.setBorder(BorderFactory.createLineBorder(Colores.BORDE));
+        scroll.setBackground(Colores.FONDO_OSCURO);
+        scroll.getViewport().setBackground(Colores.FONDO_OSCURO);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
 
-        colTutor.add(cabTutor,      BorderLayout.NORTH);
-        colTutor.add(scrollTutores, BorderLayout.CENTER);
+        panel.add(cabecera, BorderLayout.NORTH);
+        panel.add(scroll,   BorderLayout.CENTER);
+        return panel;
+    }
 
-        // ── Columna derecha: asunto + cuerpo ──────────
-        JPanel colMensaje = new JPanel(new BorderLayout(0, 8));
-        colMensaje.setBackground(Colores.FONDO_PANEL);
+    // ── Columna derecha: asunto + cuerpo + enviar ────
 
-        JPanel panelAsunto = new JPanel(new BorderLayout(0, 4));
+    private JPanel construirPanelMensaje() {
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(Colores.FONDO_PANEL);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Colores.BORDE),
+            new EmptyBorder(16, 16, 16, 16)
+        ));
+
+        // Asunto
+        JPanel panelAsunto = new JPanel(new BorderLayout(0, 6));
         panelAsunto.setBackground(Colores.FONDO_PANEL);
         JLabel lblAsunto = new JLabel("Asunto");
         lblAsunto.setFont(Colores.FUENTE_PEQUEÑA);
         lblAsunto.setForeground(Colores.TEXTO_GRIS);
         campoAsunto = new JTextField();
         Componentes.estilizarCampo(campoAsunto);
-        panelAsunto.add(lblAsunto,    BorderLayout.NORTH);
-        panelAsunto.add(campoAsunto,  BorderLayout.CENTER);
+        panelAsunto.add(lblAsunto,   BorderLayout.NORTH);
+        panelAsunto.add(campoAsunto, BorderLayout.CENTER);
 
-        JPanel panelCuerpo = new JPanel(new BorderLayout(0, 4));
+        // Cuerpo
+        JPanel panelCuerpo = new JPanel(new BorderLayout(0, 6));
         panelCuerpo.setBackground(Colores.FONDO_PANEL);
         JLabel lblCuerpo = new JLabel("Mensaje");
         lblCuerpo.setFont(Colores.FUENTE_PEQUEÑA);
@@ -163,20 +184,18 @@ public class MessagingPanel extends JPanel {
         areaCuerpo.setFont(Colores.FUENTE_NORMAL);
         areaCuerpo.setLineWrap(true);
         areaCuerpo.setWrapStyleWord(true);
-        areaCuerpo.setBorder(new EmptyBorder(6, 8, 6, 8));
+        areaCuerpo.setBorder(new EmptyBorder(8, 10, 8, 10));
 
         JScrollPane scrollCuerpo = new JScrollPane(areaCuerpo);
         scrollCuerpo.setBorder(BorderFactory.createLineBorder(Colores.BORDE));
         scrollCuerpo.setBackground(Colores.FONDO_OSCURO);
         scrollCuerpo.getViewport().setBackground(Colores.FONDO_OSCURO);
+        scrollCuerpo.getVerticalScrollBar().setUnitIncrement(12);
 
-        panelCuerpo.add(lblCuerpo,   BorderLayout.NORTH);
+        panelCuerpo.add(lblCuerpo,    BorderLayout.NORTH);
         panelCuerpo.add(scrollCuerpo, BorderLayout.CENTER);
 
-        // Fila inferior: estado + botón enviar
-        JPanel filaEnviar = new JPanel(new BorderLayout(8, 0));
-        filaEnviar.setBackground(Colores.FONDO_PANEL);
-
+        // Pie: estado + botón
         lblEstado = new JLabel(" ");
         lblEstado.setFont(Colores.FUENTE_PEQUEÑA);
         lblEstado.setForeground(Colores.TEXTO_GRIS);
@@ -184,48 +203,61 @@ public class MessagingPanel extends JPanel {
         JButton btnEnviar = Componentes.botonPrimario("Enviar correo");
         btnEnviar.addActionListener(e -> enviar());
 
-        filaEnviar.add(lblEstado, BorderLayout.CENTER);
-        filaEnviar.add(btnEnviar, BorderLayout.EAST);
+        JPanel pie = new JPanel(new BorderLayout(8, 0));
+        pie.setBackground(Colores.FONDO_PANEL);
+        pie.add(lblEstado, BorderLayout.CENTER);
+        pie.add(btnEnviar, BorderLayout.EAST);
 
-        colMensaje.add(panelAsunto, BorderLayout.NORTH);
-        colMensaje.add(panelCuerpo, BorderLayout.CENTER);
-        colMensaje.add(filaEnviar,  BorderLayout.SOUTH);
-
-        card.add(colTutor,   BorderLayout.WEST);
-        card.add(colMensaje, BorderLayout.CENTER);
-
-        // ── Título historial ──────────────────────────
-        JLabel lblHistorial = new JLabel("Mensajes enviados");
-        lblHistorial.setFont(Colores.FUENTE_BOLD);
-        lblHistorial.setForeground(Colores.TEXTO_GRIS);
-        lblHistorial.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        norte.add(fila1);
-        norte.add(Box.createVerticalStrut(10));
-        norte.add(card);
-        norte.add(Box.createVerticalStrut(14));
-        norte.add(lblHistorial);
-        norte.add(Box.createVerticalStrut(4));
-
-        cargarTutores();
-        return norte;
+        panel.add(panelAsunto, BorderLayout.NORTH);
+        panel.add(panelCuerpo, BorderLayout.CENTER);
+        panel.add(pie,         BorderLayout.SOUTH);
+        return panel;
     }
 
-    private JScrollPane construirTabla() {
+    // ═══════════════════════════════════════════════
+    //  TAB: HISTORIAL
+    // ═══════════════════════════════════════════════
+
+    private JPanel construirTabHistorial() {
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(Colores.FONDO_OSCURO);
+        panel.setBorder(new EmptyBorder(16, 0, 0, 0));
+
+        // Buscador
+        campoBuscarHistorial = new JTextField();
+        campoBuscarHistorial.setBackground(Colores.FONDO_PANEL);
+        campoBuscarHistorial.setForeground(Colores.TEXTO_CLARO);
+        campoBuscarHistorial.setCaretColor(Colores.TEXTO_CLARO);
+        campoBuscarHistorial.setFont(Colores.FUENTE_NORMAL);
+        campoBuscarHistorial.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Colores.BORDE),
+            new EmptyBorder(6, 10, 6, 10)
+        ));
+        campoBuscarHistorial.setToolTipText("Filtrar por tutor o asunto...");
+        campoBuscarHistorial.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e)  { filtrarHistorial(); }
+            public void removeUpdate(DocumentEvent e)  { filtrarHistorial(); }
+            public void changedUpdate(DocumentEvent e) { filtrarHistorial(); }
+        });
+
+        // Tabla
         String[] columnas = {"Tutor", "Asunto", "Fecha"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabla = new JTable(modeloTabla);
         tabla.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        tabla.getColumnModel().getColumn(0).setPreferredWidth(170);
-        tabla.getColumnModel().getColumn(1).setPreferredWidth(340);
-        tabla.getColumnModel().getColumn(2).setPreferredWidth(150);
-        return Componentes.crearScrollTabla(tabla);
+        tabla.getColumnModel().getColumn(0).setPreferredWidth(200);
+        tabla.getColumnModel().getColumn(1).setPreferredWidth(400);
+        tabla.getColumnModel().getColumn(2).setPreferredWidth(160);
+
+        panel.add(campoBuscarHistorial, BorderLayout.NORTH);
+        panel.add(Componentes.crearScrollTabla(tabla), BorderLayout.CENTER);
+        return panel;
     }
 
     // ═══════════════════════════════════════════════
-    //  LÓGICA
+    //  LÓGICA — Tutores
     // ═══════════════════════════════════════════════
 
     private void cargarTutores() {
@@ -235,74 +267,79 @@ public class MessagingPanel extends JPanel {
     }
 
     private void filtrarTutores() {
-        String texto = campoBuscarTutor.getText().trim().toLowerCase();
+        String txt = campoBuscarTutor.getText().trim().toLowerCase();
         modeloTutores.clear();
         for (Tutor t : todosTutores) {
-            if (texto.isEmpty() || coincideTutor(t, texto)) {
-                modeloTutores.addElement(t);
-            }
+            if (txt.isEmpty() || coincideTutor(t, txt)) modeloTutores.addElement(t);
         }
     }
 
-    private boolean coincideTutor(Tutor t, String texto) {
-        if (t.getNombre() != null && t.getNombre().toLowerCase().contains(texto)) return true;
-        if (t.getEmail()  != null && t.getEmail().toLowerCase().contains(texto))  return true;
+    private boolean coincideTutor(Tutor t, String txt) {
+        if (t.getNombre() != null && t.getNombre().toLowerCase().contains(txt)) return true;
+        if (t.getEmail()  != null && t.getEmail().toLowerCase().contains(txt))  return true;
         return false;
     }
 
-    private void actualizarTutorSeleccionado() {
+    private void actualizarTutorSel() {
         Tutor t = listaTutores.getSelectedValue();
         if (t == null) {
-            lblTutorSeleccionado.setText("Ninguno seleccionado");
-            lblTutorSeleccionado.setForeground(Colores.TEXTO_GRIS);
+            lblTutorSel.setText("Ninguno seleccionado");
+            lblTutorSel.setForeground(Colores.TEXTO_GRIS);
         } else {
             String email = (t.getEmail() != null && !t.getEmail().isEmpty()) ? t.getEmail() : "sin correo";
-            lblTutorSeleccionado.setText("✓ " + t.getNombre() + " — " + email);
-            lblTutorSeleccionado.setForeground(Colores.VERDE);
+            lblTutorSel.setText("✓ " + t.getNombre() + "  —  " + email);
+            lblTutorSel.setForeground(Colores.VERDE);
         }
     }
 
+    // ═══════════════════════════════════════════════
+    //  LÓGICA — Envío
+    // ═══════════════════════════════════════════════
+
     private void enviar() {
         Tutor tutor = listaTutores.getSelectedValue();
-        if (tutor == null) {
-            mostrarEstado("Selecciona un tutor destinatario.", Colores.AMARILLO);
-            return;
-        }
+        if (tutor == null) { mostrarEstado("Selecciona un tutor destinatario.", Colores.AMARILLO); return; }
         if (tutor.getEmail() == null || tutor.getEmail().isEmpty()) {
             mostrarEstado("El tutor \"" + tutor.getNombre() + "\" no tiene correo registrado.", Colores.AMARILLO);
             return;
         }
-
         String asunto = campoAsunto.getText().trim();
         String cuerpo = areaCuerpo.getText().trim();
         if (asunto.isEmpty()) { mostrarEstado("El asunto no puede estar vacío.", Colores.AMARILLO); return; }
         if (cuerpo.isEmpty()) { mostrarEstado("El mensaje no puede estar vacío.", Colores.AMARILLO); return; }
 
         mostrarEstado("Enviando...", Colores.TEXTO_GRIS);
-
         String error = EmailService.enviar(tutor.getEmail(), asunto, cuerpo);
         if (error != null) { mostrarEstado(error, Colores.ROJO); return; }
 
-        int usuarioId = SessionManager.getUsuario().getId();
-        mensajeDAO.insertar(new Mensaje(usuarioId, tutor.getId(), asunto, cuerpo));
-
+        mensajeDAO.insertar(new Mensaje(SessionManager.getUsuario().getId(), tutor.getId(), asunto, cuerpo));
         campoAsunto.setText("");
         areaCuerpo.setText("");
         listaTutores.clearSelection();
         campoBuscarTutor.setText("");
         mostrarEstado("Correo enviado a " + tutor.getEmail(), Colores.VERDE);
-        cargarHistorial();
     }
 
+    // ═══════════════════════════════════════════════
+    //  LÓGICA — Historial
+    // ═══════════════════════════════════════════════
+
     private void cargarHistorial() {
-        List<Mensaje> lista = mensajeDAO.listarTodos();
+        todosMensajes = mensajeDAO.listarTodos();
+        filtrarHistorial();
+    }
+
+    private void filtrarHistorial() {
+        String txt = campoBuscarHistorial == null ? "" : campoBuscarHistorial.getText().trim().toLowerCase();
         modeloTabla.setRowCount(0);
-        for (Mensaje m : lista) {
-            modeloTabla.addRow(new Object[]{
-                m.getTutorNombre() != null ? m.getTutorNombre() : "-",
-                m.getAsunto(),
-                m.getFechaTexto()
-            });
+        for (Mensaje m : todosMensajes) {
+            String tutor  = m.getTutorNombre() != null ? m.getTutorNombre() : "-";
+            String asunto = m.getAsunto()      != null ? m.getAsunto()      : "";
+            if (txt.isEmpty()
+                    || tutor.toLowerCase().contains(txt)
+                    || asunto.toLowerCase().contains(txt)) {
+                modeloTabla.addRow(new Object[]{tutor, asunto, m.getFechaTexto()});
+            }
         }
     }
 
@@ -312,7 +349,7 @@ public class MessagingPanel extends JPanel {
     }
 
     // ═══════════════════════════════════════════════
-    //  RENDERER — celda de tutor
+    //  RENDERER — fila de tutor en la lista
     // ═══════════════════════════════════════════════
 
     private class TutorCellRenderer implements ListCellRenderer<Tutor> {
@@ -338,19 +375,43 @@ public class MessagingPanel extends JPanel {
             lblNom.setText(t.getNombre());
             lblNom.setFont(Colores.FUENTE_BOLD);
 
-            String email = (t.getEmail() != null && !t.getEmail().isEmpty()) ? t.getEmail() : "Sin correo";
+            String email  = (t.getEmail()      != null && !t.getEmail().isEmpty())      ? t.getEmail()      : "Sin correo";
             String parent = (t.getParentesco() != null && !t.getParentesco().isEmpty()) ? "  ·  " + t.getParentesco() : "";
             lblInfo.setText(email + parent);
             lblInfo.setFont(Colores.FUENTE_PEQUEÑA);
 
-            Color fondo = isSelected ? new Color(0x1E, 0x3A, 0x5A)
-                        : (index % 2 == 0 ? Colores.FONDO_OSCURO : new Color(0x16, 0x20, 0x2C));
+            Color fondo = isSelected
+                ? new Color(0x1E, 0x3A, 0x5A)
+                : (index % 2 == 0 ? Colores.FONDO_OSCURO : new Color(0x16, 0x20, 0x2C));
 
             celda.setBackground(fondo);
             lblNom.setForeground(isSelected ? Colores.AZUL_PRIMARIO : Colores.TEXTO_CLARO);
             lblInfo.setForeground(Colores.TEXTO_GRIS);
-
             return celda;
         }
+    }
+
+    // ═══════════════════════════════════════════════
+    //  ESTILO — JTabbedPane oscuro
+    // ═══════════════════════════════════════════════
+
+    private void estilizarTabs(JTabbedPane tabs) {
+        tabs.setBackground(Colores.FONDO_OSCURO);
+        tabs.setForeground(Colores.TEXTO_CLARO);
+        tabs.setFont(Colores.FUENTE_BOLD);
+        tabs.setBorder(null);
+        tabs.setOpaque(true);
+
+        UIManager.put("TabbedPane.selected",          Colores.FONDO_PANEL);
+        UIManager.put("TabbedPane.background",        Colores.FONDO_OSCURO);
+        UIManager.put("TabbedPane.foreground",        Colores.TEXTO_CLARO);
+        UIManager.put("TabbedPane.unselectedBackground", Colores.SIDEBAR_FONDO);
+        UIManager.put("TabbedPane.contentAreaColor",  Colores.FONDO_OSCURO);
+        UIManager.put("TabbedPane.light",             Colores.BORDE);
+        UIManager.put("TabbedPane.highlight",         Colores.BORDE);
+        UIManager.put("TabbedPane.shadow",            Colores.BORDE);
+        UIManager.put("TabbedPane.darkShadow",        Colores.BORDE);
+        UIManager.put("TabbedPane.focus",             Colores.AZUL_PRIMARIO);
+        tabs.updateUI();
     }
 }
