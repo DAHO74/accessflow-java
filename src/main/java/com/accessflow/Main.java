@@ -1,6 +1,5 @@
 package com.accessflow;
 
-import com.accessflow.database.Conexion;
 import com.accessflow.view.LoginFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -15,8 +14,6 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        Conexion.migrar();
 
         // Toda la interfaz Swing debe iniciarse en el Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
