@@ -12,6 +12,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -23,7 +27,7 @@ import java.util.Set;
 public class TutorFormPanel extends JPanel {
 
     private static final int MAX_ALUMNOS = 3;
-    private static final String[] PARENTESCOS = {"Madre", "Padre", "Abuelo(a)", "Otro"};
+    private static final String[] PARENTESCOS = {"Madre", "Padre", "Otro"};
 
     private final MainFrame mainFrame;
     private final Tutor     tutor;
@@ -116,6 +120,7 @@ public class TutorFormPanel extends JPanel {
         Componentes.estilizarCampo(campoNombre);
         Componentes.estilizarCampo(campoEmail);
         Componentes.estilizarCampo(campoTelefono);
+        aplicarFiltroTelefono(campoTelefono);
 
         // ── Parentesco ────────────────────────────────
         cmbParentesco = new JComboBox<>(PARENTESCOS);
@@ -296,10 +301,10 @@ public class TutorFormPanel extends JPanel {
     }
 
     private boolean coincide(Alumno a, String texto) {
-        if (a.getNombre()     != null && a.getNombre().toLowerCase().contains(texto))     return true;
+        if (a.getNombre()     != null && a.getNombre().toLowerCase().contains(texto))      return true;
         if (a.getGrupoNombre()!= null && a.getGrupoNombre().toLowerCase().contains(texto)) return true;
-        if (a.getGrupoGrado() != null && a.getGrupoGrado().toLowerCase().contains(texto)) return true;
-        if (String.valueOf(a.getId()).contains(texto)) return true;
+        if (a.getGrupoGrado() != null && a.getGrupoGrado().toLowerCase().contains(texto))  return true;
+        if (a.getRfidUid()    != null && a.getRfidUid().toLowerCase().contains(texto))     return true;
         return false;
     }
 
@@ -440,9 +445,10 @@ public class TutorFormPanel extends JPanel {
             lblNom.setText(a.getNombre());
             lblNom.setFont(Colores.FUENTE_BOLD);
 
-            String grado = (a.getGrupoGrado()  != null && !a.getGrupoGrado().isEmpty())  ? a.getGrupoGrado()  : "—";
-            String grupo = (a.getGrupoNombre()  != null && !a.getGrupoNombre().isEmpty()) ? a.getGrupoNombre() : "Sin grupo";
-            lblInfo.setText("ID #" + a.getId() + "   ·   " + grado + "   ·   " + grupo);
+            String rfid  = (a.getRfidUid()    != null && !a.getRfidUid().isEmpty())    ? a.getRfidUid()    : "Sin RFID";
+            String grado = (a.getGrupoGrado() != null && !a.getGrupoGrado().isEmpty()) ? a.getGrupoGrado() : "—";
+            String grupo = (a.getGrupoNombre()!= null && !a.getGrupoNombre().isEmpty())? a.getGrupoNombre(): "Sin grupo";
+            lblInfo.setText("RFID: " + rfid + "   ·   " + grado + "   ·   " + grupo);
             lblInfo.setFont(Colores.FUENTE_PEQUEÑA);
 
             Color fondo = isSelected ? new Color(0x1E, 0x3A, 0x5A)
@@ -465,6 +471,32 @@ public class TutorFormPanel extends JPanel {
         lbl.setForeground(Colores.TEXTO_GRIS);
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         return lbl;
+    }
+
+    private void aplicarFiltroTelefono(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
+                    throws BadLocationException {
+                if (text == null) return;
+                String limpio = text.replaceAll("[^0-9\\-]", "");
+                if (digitosResultantes(fb, offset, 0, limpio) <= 10)
+                    super.insertString(fb, offset, limpio, attr);
+            }
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                    throws BadLocationException {
+                String limpio = (text == null) ? "" : text.replaceAll("[^0-9\\-]", "");
+                if (digitosResultantes(fb, offset, length, limpio) <= 10)
+                    super.replace(fb, offset, length, limpio, attrs);
+            }
+            private long digitosResultantes(FilterBypass fb, int offset, int length, String nuevo)
+                    throws BadLocationException {
+                String actual  = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String resultado = actual.substring(0, offset) + nuevo + actual.substring(offset + length);
+                return resultado.chars().filter(Character::isDigit).count();
+            }
+        });
     }
 
     private void estilizarCombo(JComboBox<String> combo) {
