@@ -10,6 +10,8 @@ import com.accessflow.view.MainFrame;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,11 @@ public class TutorFormPanel extends JPanel {
     private JTextField campoNombre;
     private JTextField campoEmail;
     private JTextField campoTelefono;
+    private JTextField campoBuscar;
     private JLabel     lblError;
+    private JLabel     lblConteo;
+
+    private JPanel panelCheckboxes;
 
     private final List<Alumno>    todosLosAlumnos   = new ArrayList<>();
     private final List<JCheckBox> checkboxesAlumnos = new ArrayList<>();
@@ -68,20 +74,26 @@ public class TutorFormPanel extends JPanel {
     }
 
     private JPanel construirCentro() {
-        JPanel exterior = new JPanel(new GridBagLayout());
-        exterior.setBackground(Colores.FONDO_OSCURO);
-        exterior.add(construirCard());
-        return exterior;
+        JPanel centro = new JPanel(new BorderLayout(16, 0));
+        centro.setBackground(Colores.FONDO_OSCURO);
+
+        centro.add(construirPanelDatos(),   BorderLayout.WEST);
+        centro.add(construirPanelAlumnos(), BorderLayout.CENTER);
+
+        return centro;
     }
 
-    private JPanel construirCard() {
-        JPanel card = new JPanel();
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBackground(Colores.FONDO_PANEL);
-        card.setBorder(BorderFactory.createCompoundBorder(
+    // ── Panel izquierdo: datos del tutor ─────────────
+
+    private JPanel construirPanelDatos() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Colores.FONDO_PANEL);
+        panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Colores.BORDE, 1),
-            new EmptyBorder(32, 32, 32, 32)
+            new EmptyBorder(28, 28, 28, 28)
         ));
+        panel.setPreferredSize(new Dimension(360, 0));
 
         campoNombre   = new JTextField();
         campoEmail    = new JTextField();
@@ -108,59 +120,97 @@ public class TutorFormPanel extends JPanel {
         panelBotones.add(btnCancelar);
         panelBotones.add(btnGuardar);
 
-        // ── Separador + sección de alumnos ──────────────
-        JSeparator sep = new JSeparator();
-        sep.setForeground(Colores.BORDE);
-        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        sep.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(crearEtiqueta("Nombre completo *"));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(campoNombre);
+        panel.add(Box.createVerticalStrut(16));
+        panel.add(crearEtiqueta("Correo electrónico"));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(campoEmail);
+        panel.add(Box.createVerticalStrut(16));
+        panel.add(crearEtiqueta("Teléfono"));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(campoTelefono);
+        panel.add(Box.createVerticalGlue());
+        panel.add(lblError);
+        panel.add(Box.createVerticalStrut(8));
+        panel.add(panelBotones);
+
+        return panel;
+    }
+
+    // ── Panel derecho: lista de alumnos con buscador ─
+
+    private JPanel construirPanelAlumnos() {
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(Colores.FONDO_PANEL);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Colores.BORDE, 1),
+            new EmptyBorder(28, 28, 28, 28)
+        ));
+
+        // ── Cabecera ──────────────────────────────────
+        JPanel cabecera = new JPanel(new BorderLayout(0, 6));
+        cabecera.setBackground(Colores.FONDO_PANEL);
 
         JLabel lblSeccion = new JLabel("Alumnos asignados a este tutor");
         lblSeccion.setFont(Colores.FUENTE_BOLD);
         lblSeccion.setForeground(Colores.TEXTO_CLARO);
-        lblSeccion.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel lblNota = new JLabel("Selecciona uno o más alumnos a cargo de este tutor.");
-        lblNota.setFont(Colores.FUENTE_PEQUEÑA);
-        lblNota.setForeground(Colores.TEXTO_GRIS);
-        lblNota.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblConteo = new JLabel(" ");
+        lblConteo.setFont(Colores.FUENTE_PEQUEÑA);
+        lblConteo.setForeground(Colores.TEXTO_GRIS);
+        lblConteo.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        JScrollPane scrollAlumnos = construirListaAlumnos();
+        JPanel filaTitulo = new JPanel(new BorderLayout());
+        filaTitulo.setBackground(Colores.FONDO_PANEL);
+        filaTitulo.add(lblSeccion, BorderLayout.WEST);
+        filaTitulo.add(lblConteo,  BorderLayout.EAST);
 
-        card.add(crearEtiqueta("Nombre completo *"));
-        card.add(Box.createVerticalStrut(5));
-        card.add(campoNombre);
-        card.add(Box.createVerticalStrut(16));
-        card.add(crearEtiqueta("Correo electrónico  (se usará para enviar notificaciones)"));
-        card.add(Box.createVerticalStrut(5));
-        card.add(campoEmail);
-        card.add(Box.createVerticalStrut(16));
-        card.add(crearEtiqueta("Teléfono"));
-        card.add(Box.createVerticalStrut(5));
-        card.add(campoTelefono);
-        card.add(Box.createVerticalStrut(20));
-        card.add(sep);
-        card.add(Box.createVerticalStrut(14));
-        card.add(lblSeccion);
-        card.add(Box.createVerticalStrut(4));
-        card.add(lblNota);
-        card.add(Box.createVerticalStrut(10));
-        card.add(scrollAlumnos);
-        card.add(Box.createVerticalStrut(14));
-        card.add(lblError);
-        card.add(Box.createVerticalStrut(8));
-        card.add(panelBotones);
+        // Campo de búsqueda
+        campoBuscar = new JTextField();
+        campoBuscar.setBackground(Colores.FONDO_OSCURO);
+        campoBuscar.setForeground(Colores.TEXTO_CLARO);
+        campoBuscar.setCaretColor(Colores.TEXTO_CLARO);
+        campoBuscar.setFont(Colores.FUENTE_NORMAL);
+        campoBuscar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Colores.BORDE),
+            new EmptyBorder(6, 10, 6, 10)
+        ));
+        campoBuscar.putClientProperty("JTextField.placeholderText", "Buscar alumno por nombre...");
+        campoBuscar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e)  { filtrar(); }
+            public void removeUpdate(DocumentEvent e)  { filtrar(); }
+            public void changedUpdate(DocumentEvent e) { filtrar(); }
+        });
 
-        return card;
-    }
+        cabecera.add(filaTitulo,  BorderLayout.NORTH);
+        cabecera.add(campoBuscar, BorderLayout.SOUTH);
 
-    private JScrollPane construirListaAlumnos() {
-        JPanel panelCheckboxes = new JPanel();
+        // ── Lista de checkboxes ───────────────────────
+        panelCheckboxes = new JPanel();
         panelCheckboxes.setLayout(new BoxLayout(panelCheckboxes, BoxLayout.Y_AXIS));
         panelCheckboxes.setBackground(Colores.FONDO_OSCURO);
-        panelCheckboxes.setBorder(new EmptyBorder(6, 8, 6, 8));
+        panelCheckboxes.setBorder(new EmptyBorder(8, 8, 8, 8));
 
+        cargarCheckboxes();
+
+        JScrollPane scroll = new JScrollPane(panelCheckboxes);
+        scroll.setBackground(Colores.FONDO_OSCURO);
+        scroll.getViewport().setBackground(Colores.FONDO_OSCURO);
+        scroll.setBorder(BorderFactory.createLineBorder(Colores.BORDE));
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        panel.add(cabecera, BorderLayout.NORTH);
+        panel.add(scroll,   BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private void cargarCheckboxes() {
         todosLosAlumnos.clear();
         checkboxesAlumnos.clear();
+        panelCheckboxes.removeAll();
 
         List<Alumno> alumnos = alumnoDAO.listarTodos();
         int tutorIdActual = (tutor != null) ? tutor.getId() : -1;
@@ -185,16 +235,34 @@ public class TutorFormPanel extends JPanel {
                 panelCheckboxes.add(Box.createVerticalStrut(2));
             }
         }
+        actualizarConteo();
+    }
 
-        JScrollPane scroll = new JScrollPane(panelCheckboxes);
-        scroll.setBackground(Colores.FONDO_OSCURO);
-        scroll.getViewport().setBackground(Colores.FONDO_OSCURO);
-        scroll.setBorder(BorderFactory.createLineBorder(Colores.BORDE));
-        scroll.setPreferredSize(new Dimension(Integer.MAX_VALUE, 160));
-        scroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
-        scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
-        scroll.getVerticalScrollBar().setUnitIncrement(10);
-        return scroll;
+    private void filtrar() {
+        String texto = campoBuscar.getText().trim().toLowerCase();
+        int visibles = 0;
+
+        for (int i = 0; i < checkboxesAlumnos.size(); i++) {
+            JCheckBox cb = checkboxesAlumnos.get(i);
+            boolean coincide = texto.isEmpty()
+                || todosLosAlumnos.get(i).getNombre().toLowerCase().contains(texto);
+            cb.setVisible(coincide);
+            if (coincide) visibles++;
+        }
+
+        panelCheckboxes.revalidate();
+        panelCheckboxes.repaint();
+        actualizarConteo(visibles);
+    }
+
+    private void actualizarConteo() {
+        long seleccionados = checkboxesAlumnos.stream().filter(JCheckBox::isSelected).count();
+        lblConteo.setText(seleccionados + " seleccionado(s) · " + todosLosAlumnos.size() + " total");
+    }
+
+    private void actualizarConteo(int visibles) {
+        long seleccionados = checkboxesAlumnos.stream().filter(JCheckBox::isSelected).count();
+        lblConteo.setText(seleccionados + " seleccionado(s) · " + visibles + " visible(s) de " + todosLosAlumnos.size());
     }
 
     // ═══════════════════════════════════════════════
@@ -205,7 +273,6 @@ public class TutorFormPanel extends JPanel {
         campoNombre.setText(tutor.getNombre());
         campoEmail.setText(tutor.getEmail()       != null ? tutor.getEmail()       : "");
         campoTelefono.setText(tutor.getTelefono() != null ? tutor.getTelefono()    : "");
-        // Los checkboxes ya se pre-marcan en construirListaAlumnos()
     }
 
     private void guardar() {
@@ -240,7 +307,6 @@ public class TutorFormPanel extends JPanel {
             return;
         }
 
-        // Aplicar asignación de alumnos
         List<Integer> seleccionados = new ArrayList<>();
         for (int i = 0; i < checkboxesAlumnos.size(); i++) {
             if (checkboxesAlumnos.get(i).isSelected()) {
