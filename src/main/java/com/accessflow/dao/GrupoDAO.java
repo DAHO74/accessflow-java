@@ -38,11 +38,16 @@ public class GrupoDAO {
     }
 
     public boolean existeConNombre(String nombre, int excludeId) {
-        String sql = "SELECT COUNT(*) FROM Grupo WHERE nombre = ? AND id != ?";
+        return existeConNombreYGrado(nombre, null, excludeId);
+    }
+
+    public boolean existeConNombreYGrado(String nombre, String grado, int excludeId) {
+        String sql = "SELECT COUNT(*) FROM Grupo WHERE nombre = ? AND grado = ? AND id != ?";
         try (Connection con = Conexion.obtener();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, nombre);
-            ps.setInt(2, excludeId);
+            ps.setString(2, grado);
+            ps.setInt(3, excludeId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt(1) > 0;
         } catch (SQLException e) {

@@ -192,8 +192,8 @@ public class GroupFormPanel extends JPanel {
         if ("—".equals(turno)) turno = null;
 
         int idActual = (grupo == null) ? 0 : grupo.getId();
-        if (grupoDAO.existeConNombre(letra, idActual)) {
-            lblError.setText("Ya existe un grupo con esa letra.");
+        if (grupoDAO.existeConNombreYGrado(letra, grado, idActual)) {
+            lblError.setText("Ya existe el grupo " + grado + letra + ". Elige otra combinación.");
             return;
         }
 
