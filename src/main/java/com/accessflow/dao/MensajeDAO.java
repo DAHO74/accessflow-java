@@ -43,6 +43,19 @@ public class MensajeDAO {
         return lista;
     }
 
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM Mensaje WHERE id = ?";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private Mensaje mapear(ResultSet rs) throws SQLException {
         Mensaje m = new Mensaje();
         m.setId(rs.getInt("id"));

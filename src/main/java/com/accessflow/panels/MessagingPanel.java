@@ -38,7 +38,8 @@ public class MessagingPanel extends JPanel {
     private JTextField         campoBuscarHistorial;
     private JTable             tabla;
     private DefaultTableModel  modeloTabla;
-    private List<Mensaje>      todosMensajes = new ArrayList<>();
+    private List<Mensaje>      todosMensajes    = new ArrayList<>();
+    private List<Mensaje>      mensajesVisibles = new ArrayList<>();
 
     // ── Tutores ──────────────────────────────────────
     private final List<Tutor>  todosTutores  = new ArrayList<>();
@@ -251,8 +252,16 @@ public class MessagingPanel extends JPanel {
         tabla.getColumnModel().getColumn(1).setPreferredWidth(400);
         tabla.getColumnModel().getColumn(2).setPreferredWidth(160);
 
-        panel.add(campoBuscarHistorial, BorderLayout.NORTH);
+        JButton btnEliminar = Componentes.botonPeligro("Eliminar seleccionado");
+        btnEliminar.addActionListener(e -> eliminarMensaje());
+
+        JPanel pie = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        pie.setBackground(Colores.FONDO_OSCURO);
+        pie.add(btnEliminar);
+
+        panel.add(campoBuscarHistorial,             BorderLayout.NORTH);
         panel.add(Componentes.crearScrollTabla(tabla), BorderLayout.CENTER);
+        panel.add(pie,                              BorderLayout.SOUTH);
         return panel;
     }
 
@@ -332,6 +341,7 @@ public class MessagingPanel extends JPanel {
     private void filtrarHistorial() {
         String txt = campoBuscarHistorial == null ? "" : campoBuscarHistorial.getText().trim().toLowerCase();
         modeloTabla.setRowCount(0);
+        mensajesVisibles.clear();
         for (Mensaje m : todosMensajes) {
             String tutor  = m.getTutorNombre() != null ? m.getTutorNombre() : "-";
             String asunto = m.getAsunto()      != null ? m.getAsunto()      : "";
@@ -339,6 +349,32 @@ public class MessagingPanel extends JPanel {
                     || tutor.toLowerCase().contains(txt)
                     || asunto.toLowerCase().contains(txt)) {
                 modeloTabla.addRow(new Object[]{tutor, asunto, m.getFechaTexto()});
+                mensajesVisibles.add(m);
+            }
+        }
+    }
+
+    private void eliminarMensaje() {
+        int fila = tabla.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this,
+                "Selecciona un mensaje del historial para eliminar.",
+                "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        Mensaje m = mensajesVisibles.get(fila);
+        String preview = m.getAsunto() != null ? m.getAsunto() : "(sin asunto)";
+        int opcion = JOptionPane.showConfirmDialog(this,
+            "¿Eliminar el mensaje \"" + preview + "\"?\nEsta acción no se puede deshacer.",
+            "Confirmar eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (opcion == JOptionPane.YES_OPTION) {
+            if (mensajeDAO.eliminar(m.getId())) {
+                cargarHistorial();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "No se pudo eliminar el mensaje.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
