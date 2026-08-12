@@ -26,9 +26,7 @@ public class Grupo {
 
     @Override
     public String toString() {
-        String extra = "";
-        if (grado != null && !grado.isEmpty()) extra += grado;
-        if (turno != null && !turno.isEmpty()) extra += (extra.isEmpty() ? "" : " · ") + turno;
-        return extra.isEmpty() ? nombre : nombre + " (" + extra + ")";
+        if (grado != null && !grado.isEmpty()) return grado + " " + nombre;
+        return nombre != null ? nombre : "";
     }
 }

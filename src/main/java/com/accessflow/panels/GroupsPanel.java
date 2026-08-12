@@ -22,7 +22,8 @@ public class GroupsPanel extends JPanel {
     private JTextField        campoBuscar;
     private JTable            tabla;
     private DefaultTableModel modeloTabla;
-    private List<Grupo>       todosLosGrupos = new ArrayList<>();
+    private List<Grupo>       todosLosGrupos  = new ArrayList<>();
+    private List<Grupo>       gruposVisibles  = new ArrayList<>();
 
     public GroupsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -55,11 +56,6 @@ public class GroupsPanel extends JPanel {
         titulo.setForeground(Colores.TEXTO_CLARO);
         fila1.add(titulo, BorderLayout.WEST);
 
-        if (SessionManager.esAdmin()) {
-            JButton btnNuevo = Componentes.botonPrimario("+ Nuevo grupo");
-            btnNuevo.addActionListener(e -> nuevo());
-            fila1.add(btnNuevo, BorderLayout.EAST);
-        }
 
         // Fila 2: búsqueda + acciones
         JPanel fila2 = new JPanel(new BorderLayout(8, 0));
@@ -85,12 +81,9 @@ public class GroupsPanel extends JPanel {
         panelBotones.add(btnBuscar);
 
         if (SessionManager.esAdmin()) {
-            JButton btnEditar   = Componentes.botonSecundario("Editar");
-            JButton btnEliminar = Componentes.botonPeligro("Eliminar");
-            btnEditar.addActionListener(e   -> editar());
-            btnEliminar.addActionListener(e -> eliminar());
+            JButton btnEditar = Componentes.botonSecundario("Editar");
+            btnEditar.addActionListener(e -> editar());
             panelBotones.add(btnEditar);
-            panelBotones.add(btnEliminar);
         }
 
         fila2.add(campoBuscar,  BorderLayout.CENTER);
@@ -102,7 +95,7 @@ public class GroupsPanel extends JPanel {
     }
 
     private JScrollPane construirTabla() {
-        String[] columnas = {"ID", "Nombre", "Grado", "Turno"};
+        String[] columnas = {"Grado", "Grupo", "Turno"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -112,12 +105,9 @@ public class GroupsPanel extends JPanel {
 
         tabla = new JTable(modeloTabla);
         tabla.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        tabla.getColumnModel().getColumn(0).setPreferredWidth(45);
-        tabla.getColumnModel().getColumn(0).setMaxWidth(55);
-        tabla.getColumnModel().getColumn(0).setCellRenderer(Componentes.rendererCentrado());
-        tabla.getColumnModel().getColumn(1).setPreferredWidth(250);
-        tabla.getColumnModel().getColumn(2).setPreferredWidth(150);
-        tabla.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tabla.getColumnModel().getColumn(0).setPreferredWidth(100);
+        tabla.getColumnModel().getColumn(1).setPreferredWidth(380);
+        tabla.getColumnModel().getColumn(2).setPreferredWidth(180);
 
         return Componentes.crearScrollTabla(tabla);
     }
@@ -133,10 +123,12 @@ public class GroupsPanel extends JPanel {
 
     private void mostrarEnTabla(List<Grupo> lista) {
         modeloTabla.setRowCount(0);
+        gruposVisibles.clear();
         for (Grupo g : lista) {
             String grado = (g.getGrado() != null && !g.getGrado().isEmpty()) ? g.getGrado() : "-";
             String turno = (g.getTurno() != null && !g.getTurno().isEmpty()) ? g.getTurno() : "-";
-            modeloTabla.addRow(new Object[]{g.getId(), g.getNombre(), grado, turno});
+            modeloTabla.addRow(new Object[]{grado, g.getNombre(), turno});
+            gruposVisibles.add(g);
         }
     }
 
@@ -167,8 +159,7 @@ public class GroupsPanel extends JPanel {
                 "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        int id = (int) modeloTabla.getValueAt(fila, 0);
-        Grupo grupo = grupoDAO.buscarPorId(id);
+        Grupo grupo = grupoDAO.buscarPorId(gruposVisibles.get(fila).getId());
         mainFrame.mostrarPanel(new GroupFormPanel(mainFrame, grupo));
     }
 
@@ -180,16 +171,15 @@ public class GroupsPanel extends JPanel {
                 "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        String nombre = (String) modeloTabla.getValueAt(fila, 1);
+        Grupo grupo = gruposVisibles.get(fila);
         int opcion = JOptionPane.showConfirmDialog(this,
-            "¿Eliminar el grupo \"" + nombre + "\"?\n" +
+            "¿Eliminar el grupo \"" + grupo.getNombre() + "\"?\n" +
             "Los alumnos de este grupo quedarán sin grupo asignado.",
             "Confirmar eliminación",
             JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (opcion == JOptionPane.YES_OPTION) {
-            int id = (int) modeloTabla.getValueAt(fila, 0);
-            if (grupoDAO.eliminar(id)) {
+            if (grupoDAO.eliminar(grupo.getId())) {
                 cargarGrupos();
             } else {
                 JOptionPane.showMessageDialog(this,

@@ -22,7 +22,8 @@ public class TutorsPanel extends JPanel {
     private JTextField        campoBuscar;
     private JTable            tabla;
     private DefaultTableModel modeloTabla;
-    private List<Tutor>       todosLosTutores = new ArrayList<>();
+    private List<Tutor>       todosLosTutores  = new ArrayList<>();
+    private List<Tutor>       tutoresVisibles  = new ArrayList<>();
 
     public TutorsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -54,12 +55,6 @@ public class TutorsPanel extends JPanel {
         titulo.setFont(Colores.FUENTE_TITULO);
         titulo.setForeground(Colores.TEXTO_CLARO);
         fila1.add(titulo, BorderLayout.WEST);
-
-        if (SessionManager.esAdmin()) {
-            JButton btnNuevo = Componentes.botonPrimario("+ Nuevo tutor");
-            btnNuevo.addActionListener(e -> nuevo());
-            fila1.add(btnNuevo, BorderLayout.EAST);
-        }
 
         // Fila 2: búsqueda + acciones
         JPanel fila2 = new JPanel(new BorderLayout(8, 0));
@@ -102,7 +97,7 @@ public class TutorsPanel extends JPanel {
     }
 
     private JScrollPane construirTabla() {
-        String[] columnas = {"ID", "Nombre", "Correo electrónico", "Teléfono"};
+        String[] columnas = {"Nombre", "Correo electrónico", "Parentesco", "Teléfono"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -112,11 +107,9 @@ public class TutorsPanel extends JPanel {
 
         tabla = new JTable(modeloTabla);
         tabla.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        tabla.getColumnModel().getColumn(0).setPreferredWidth(45);
-        tabla.getColumnModel().getColumn(0).setMaxWidth(55);
-        tabla.getColumnModel().getColumn(0).setCellRenderer(Componentes.rendererCentrado());
-        tabla.getColumnModel().getColumn(1).setPreferredWidth(200);
-        tabla.getColumnModel().getColumn(2).setPreferredWidth(220);
+        tabla.getColumnModel().getColumn(0).setPreferredWidth(210);
+        tabla.getColumnModel().getColumn(1).setPreferredWidth(230);
+        tabla.getColumnModel().getColumn(2).setPreferredWidth(110);
         tabla.getColumnModel().getColumn(3).setPreferredWidth(130);
 
         return Componentes.crearScrollTabla(tabla);
@@ -133,10 +126,13 @@ public class TutorsPanel extends JPanel {
 
     private void mostrarEnTabla(List<Tutor> lista) {
         modeloTabla.setRowCount(0);
+        tutoresVisibles.clear();
         for (Tutor t : lista) {
-            String email    = (t.getEmail()    != null && !t.getEmail().isEmpty())    ? t.getEmail()    : "-";
-            String telefono = (t.getTelefono() != null && !t.getTelefono().isEmpty()) ? t.getTelefono() : "-";
-            modeloTabla.addRow(new Object[]{t.getId(), t.getNombre(), email, telefono});
+            String email      = (t.getEmail()       != null && !t.getEmail().isEmpty())       ? t.getEmail()       : "-";
+            String parentesco = (t.getParentesco()  != null && !t.getParentesco().isEmpty())  ? t.getParentesco()  : "-";
+            String telefono   = (t.getTelefono()    != null && !t.getTelefono().isEmpty())    ? t.getTelefono()    : "-";
+            modeloTabla.addRow(new Object[]{t.getNombre(), email, parentesco, telefono});
+            tutoresVisibles.add(t);
         }
     }
 
@@ -155,10 +151,6 @@ public class TutorsPanel extends JPanel {
         mostrarEnTabla(filtrados);
     }
 
-    private void nuevo() {
-        mainFrame.mostrarPanel(new TutorFormPanel(mainFrame, null));
-    }
-
     private void editar() {
         int fila = tabla.getSelectedRow();
         if (fila < 0) {
@@ -167,8 +159,7 @@ public class TutorsPanel extends JPanel {
                 "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        int id = (int) modeloTabla.getValueAt(fila, 0);
-        Tutor tutor = tutorDAO.buscarPorId(id);
+        Tutor tutor = tutorDAO.buscarPorId(tutoresVisibles.get(fila).getId());
         mainFrame.mostrarPanel(new TutorFormPanel(mainFrame, tutor));
     }
 
@@ -180,15 +171,14 @@ public class TutorsPanel extends JPanel {
                 "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        String nombre = (String) modeloTabla.getValueAt(fila, 1);
+        Tutor tutor = tutoresVisibles.get(fila);
         int opcion = JOptionPane.showConfirmDialog(this,
-            "¿Eliminar al tutor \"" + nombre + "\"?\nEsta acción no se puede deshacer.",
+            "¿Eliminar al tutor \"" + tutor.getNombre() + "\"?\nEsta acción no se puede deshacer.",
             "Confirmar eliminación",
             JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (opcion == JOptionPane.YES_OPTION) {
-            int id = (int) modeloTabla.getValueAt(fila, 0);
-            if (tutorDAO.eliminar(id)) {
+            if (tutorDAO.eliminar(tutor.getId())) {
                 cargarTutores();
             } else {
                 JOptionPane.showMessageDialog(this,

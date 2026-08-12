@@ -17,6 +17,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class TutorFormPanel extends JPanel {
             BorderFactory.createLineBorder(Colores.BORDE, 1),
             new EmptyBorder(28, 28, 28, 28)
         ));
-        panel.setPreferredSize(new Dimension(380, 0));
+        panel.setPreferredSize(new Dimension(420, 0));
 
         campoNombre   = new JTextField();
         campoEmail    = new JTextField();
@@ -132,7 +133,7 @@ public class TutorFormPanel extends JPanel {
         panelOtroParentesco = new JPanel(new BorderLayout(0, 4));
         panelOtroParentesco.setBackground(Colores.FONDO_PANEL);
         panelOtroParentesco.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panelOtroParentesco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        panelOtroParentesco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
 
         JLabel lblOtro = new JLabel("Especificar parentesco *");
         lblOtro.setFont(Colores.FUENTE_PEQUEÑA);
@@ -141,10 +142,14 @@ public class TutorFormPanel extends JPanel {
         panelOtroParentesco.add(campoOtroParentesco,   BorderLayout.CENTER);
         panelOtroParentesco.setVisible(false);
 
-        cmbParentesco.addActionListener(e -> {
-            boolean esOtro = "Otro".equals(cmbParentesco.getSelectedItem());
-            panelOtroParentesco.setVisible(esOtro);
-            panel.revalidate();
+        cmbParentesco.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                boolean esOtro = "Otro".equals(e.getItem());
+                panelOtroParentesco.setVisible(esOtro);
+                panel.invalidate();
+                panel.validate();
+                panel.repaint();
+            }
         });
 
         // ── Error y botones ───────────────────────────
@@ -479,22 +484,27 @@ public class TutorFormPanel extends JPanel {
             public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
                     throws BadLocationException {
                 if (text == null) return;
-                String limpio = text.replaceAll("[^0-9\\-]", "");
-                if (digitosResultantes(fb, offset, 0, limpio) <= 10)
+                String limpio    = text.replaceAll("[^0-9\\-]", "");
+                String resultado = resultante(fb, offset, 0, limpio);
+                if (valido(resultado))
                     super.insertString(fb, offset, limpio, attr);
             }
             @Override
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                     throws BadLocationException {
-                String limpio = (text == null) ? "" : text.replaceAll("[^0-9\\-]", "");
-                if (digitosResultantes(fb, offset, length, limpio) <= 10)
+                String limpio    = (text == null) ? "" : text.replaceAll("[^0-9\\-]", "");
+                String resultado = resultante(fb, offset, length, limpio);
+                if (valido(resultado))
                     super.replace(fb, offset, length, limpio, attrs);
             }
-            private long digitosResultantes(FilterBypass fb, int offset, int length, String nuevo)
+            private String resultante(FilterBypass fb, int offset, int length, String nuevo)
                     throws BadLocationException {
-                String actual  = fb.getDocument().getText(0, fb.getDocument().getLength());
-                String resultado = actual.substring(0, offset) + nuevo + actual.substring(offset + length);
-                return resultado.chars().filter(Character::isDigit).count();
+                String actual = fb.getDocument().getText(0, fb.getDocument().getLength());
+                return actual.substring(0, offset) + nuevo + actual.substring(offset + length);
+            }
+            private boolean valido(String s) {
+                long digitos = s.chars().filter(Character::isDigit).count();
+                return digitos <= 10 && s.length() <= 12;
             }
         });
     }

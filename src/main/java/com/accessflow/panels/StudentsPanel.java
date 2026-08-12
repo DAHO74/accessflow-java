@@ -22,7 +22,8 @@ public class StudentsPanel extends JPanel {
     private JTextField        campoBuscar;
     private JTable            tabla;
     private DefaultTableModel modeloTabla;
-    private List<Alumno>      todosLosAlumnos = new ArrayList<>();
+    private List<Alumno>      todosLosAlumnos  = new ArrayList<>();
+    private List<Alumno>      alumnosVisibles  = new ArrayList<>();
 
     public StudentsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -102,7 +103,7 @@ public class StudentsPanel extends JPanel {
     }
 
     private JScrollPane construirTabla() {
-        String[] columnas = {"ID", "Nombre", "RFID UID", "Grupo", "Tutor"};
+        String[] columnas = {"Nombre", "Grupo", "RFID UID", "Tutor"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -112,13 +113,10 @@ public class StudentsPanel extends JPanel {
 
         tabla = new JTable(modeloTabla);
         tabla.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        tabla.getColumnModel().getColumn(0).setPreferredWidth(45);
-        tabla.getColumnModel().getColumn(0).setMaxWidth(55);
-        tabla.getColumnModel().getColumn(0).setCellRenderer(Componentes.rendererCentrado());
-        tabla.getColumnModel().getColumn(1).setPreferredWidth(190);
-        tabla.getColumnModel().getColumn(2).setPreferredWidth(130);
-        tabla.getColumnModel().getColumn(3).setPreferredWidth(130);
-        tabla.getColumnModel().getColumn(4).setPreferredWidth(150);
+        tabla.getColumnModel().getColumn(0).setPreferredWidth(220);
+        tabla.getColumnModel().getColumn(1).setPreferredWidth(130);
+        tabla.getColumnModel().getColumn(2).setPreferredWidth(150);
+        tabla.getColumnModel().getColumn(3).setPreferredWidth(180);
 
         return Componentes.crearScrollTabla(tabla);
     }
@@ -134,14 +132,13 @@ public class StudentsPanel extends JPanel {
 
     private void mostrarEnTabla(List<Alumno> lista) {
         modeloTabla.setRowCount(0);
+        alumnosVisibles.clear();
         for (Alumno a : lista) {
-            String rfid  = (a.getRfidUid() != null && !a.getRfidUid().isEmpty())
-                           ? a.getRfidUid() : "-";
-            String grupo = (a.getGrupoNombre() != null && !a.getGrupoNombre().isEmpty())
-                           ? a.getGrupoNombre() : "Sin grupo";
-            String tutor = (a.getTutorNombre() != null && !a.getTutorNombre().isEmpty())
-                           ? a.getTutorNombre() : "Sin tutor";
-            modeloTabla.addRow(new Object[]{a.getId(), a.getNombre(), rfid, grupo, tutor});
+            String rfid  = (a.getRfidUid()    != null && !a.getRfidUid().isEmpty())    ? a.getRfidUid()    : "-";
+            String grupo = (a.getGrupoNombre() != null && !a.getGrupoNombre().isEmpty()) ? a.getGrupoNombre() : "Sin grupo";
+            String tutor = (a.getTutorNombre() != null && !a.getTutorNombre().isEmpty()) ? a.getTutorNombre() : "Sin tutor";
+            modeloTabla.addRow(new Object[]{a.getNombre(), grupo, rfid, tutor});
+            alumnosVisibles.add(a);
         }
     }
 
@@ -172,8 +169,7 @@ public class StudentsPanel extends JPanel {
                 "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        int id = (int) modeloTabla.getValueAt(fila, 0);
-        Alumno alumno = alumnoDAO.buscarPorId(id);
+        Alumno alumno = alumnoDAO.buscarPorId(alumnosVisibles.get(fila).getId());
         mainFrame.mostrarPanel(new StudentFormPanel(mainFrame, alumno));
     }
 
@@ -185,15 +181,14 @@ public class StudentsPanel extends JPanel {
                 "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        String nombre = (String) modeloTabla.getValueAt(fila, 1);
+        Alumno alumno = alumnosVisibles.get(fila);
         int opcion = JOptionPane.showConfirmDialog(this,
-            "¿Eliminar al alumno \"" + nombre + "\"?\nEsta acción no se puede deshacer.",
+            "¿Eliminar al alumno \"" + alumno.getNombre() + "\"?\nEsta acción no se puede deshacer.",
             "Confirmar eliminación",
             JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (opcion == JOptionPane.YES_OPTION) {
-            int id = (int) modeloTabla.getValueAt(fila, 0);
-            if (alumnoDAO.eliminar(id)) {
+            if (alumnoDAO.eliminar(alumno.getId())) {
                 cargarAlumnos();
             } else {
                 JOptionPane.showMessageDialog(this,

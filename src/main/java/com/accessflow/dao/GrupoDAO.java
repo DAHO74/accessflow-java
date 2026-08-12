@@ -11,7 +11,7 @@ public class GrupoDAO {
 
     public List<Grupo> listarTodos() {
         List<Grupo> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Grupo ORDER BY nombre";
+        String sql = "SELECT * FROM Grupo ORDER BY turno, grado, nombre";
         try (Connection con = Conexion.obtener();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -110,6 +110,42 @@ public class GrupoDAO {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public void seedGruposPredefinidos() {
+        String[] letrasMatutino   = {"A", "B", "C", "D", "E", "F"};
+        String[] letrasVespertino = {"G", "H", "I", "J", "K", "L"};
+        String[] grados           = {"1°", "2°", "3°"};
+
+        String sqlCheck  = "SELECT COUNT(*) FROM Grupo WHERE nombre = ? AND grado = ?";
+        String sqlInsert = "INSERT INTO Grupo (nombre, grado, turno) VALUES (?, ?, ?)";
+
+        try (Connection con = Conexion.obtener()) {
+            for (String grado : grados) {
+                for (String letra : letrasMatutino)
+                    insertarSiNoExiste(con, sqlCheck, sqlInsert, letra, grado, "Matutino");
+                for (String letra : letrasVespertino)
+                    insertarSiNoExiste(con, sqlCheck, sqlInsert, letra, grado, "Vespertino");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void insertarSiNoExiste(Connection con, String sqlCheck, String sqlInsert,
+            String nombre, String grado, String turno) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(sqlCheck)) {
+            ps.setString(1, nombre);
+            ps.setString(2, grado);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) return;
+        }
+        try (PreparedStatement ps = con.prepareStatement(sqlInsert)) {
+            ps.setString(1, nombre);
+            ps.setString(2, grado);
+            ps.setString(3, turno);
+            ps.executeUpdate();
+        }
     }
 
     private Grupo mapear(ResultSet rs) throws SQLException {
