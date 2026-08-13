@@ -11,10 +11,16 @@ import com.accessflow.util.Colores;
 import com.accessflow.util.Componentes;
 import com.accessflow.view.MainFrame;
 
+import com.sun.net.httpserver.HttpServer;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -31,6 +37,7 @@ public class AttendancePanel extends JPanel {
     private JLabel            lblPresentes;
     private JTable            tabla;
     private DefaultTableModel modeloTabla;
+    private HttpServer        servidorHttp;
 
     public AttendancePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -42,6 +49,7 @@ public class AttendancePanel extends JPanel {
 
         cargarTablaHoy();
         actualizarContador();
+        iniciarServidorHttp();
     }
 
     // ═══════════════════════════════════════════════
@@ -233,5 +241,38 @@ public class AttendancePanel extends JPanel {
     private void mostrarMensaje(String texto, Color color) {
         lblMensaje.setText(texto);
         lblMensaje.setForeground(color);
+    }
+
+    private void iniciarServidorHttp() {
+        try {
+            servidorHttp = HttpServer.create(new InetSocketAddress(8080), 0);
+            servidorHttp.createContext("/rfid", exchange -> {
+                if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    InputStream is = exchange.getRequestBody();
+                    String uid = new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+                    is.close();
+
+                    SwingUtilities.invokeLater(() -> {
+                        campoRfid.setText(uid);
+                        registrar();
+                    });
+
+                    byte[] respuesta = "OK".getBytes(StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(200, respuesta.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(respuesta);
+                    os.close();
+                } else {
+                    exchange.sendResponseHeaders(405, -1);
+                    exchange.close();
+                }
+            });
+            servidorHttp.setExecutor(null);
+            servidorHttp.start();
+        } catch (Exception e) {
+            SwingUtilities.invokeLater(() ->
+                mostrarMensaje("Puerto 8080 ocupado — reinicia la app.", Colores.ROJO)
+            );
+        }
     }
 }
