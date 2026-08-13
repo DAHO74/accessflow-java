@@ -128,7 +128,7 @@ public class AttendanceHistoryPanel extends JPanel {
     }
 
     private JScrollPane construirTabla() {
-        String[] columnas = {"Alumno", "Grupo", "Fecha", "Hora entrada", "Hora salida", "Estado"};
+        String[] columnas = {"Alumno", "Grupo", "Entrada", "Salida", "Estado"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -136,12 +136,17 @@ public class AttendanceHistoryPanel extends JPanel {
 
         tabla = new JTable(modeloTabla);
         tabla.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        tabla.getColumnModel().getColumn(0).setPreferredWidth(190);
-        tabla.getColumnModel().getColumn(1).setPreferredWidth(140);
-        tabla.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tabla.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tabla.getColumnModel().getColumn(0).setPreferredWidth(220);
+        tabla.getColumnModel().getColumn(1).setPreferredWidth(160);
+        tabla.getColumnModel().getColumn(2).setPreferredWidth(130);
+        tabla.getColumnModel().getColumn(3).setPreferredWidth(130);
         tabla.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tabla.getColumnModel().getColumn(5).setPreferredWidth(100);
+
+        javax.swing.table.DefaultTableCellRenderer centrado = Componentes.rendererCentrado();
+        tabla.getColumnModel().getColumn(1).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(2).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(3).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(4).setCellRenderer(centrado);
 
         return Componentes.crearScrollTabla(tabla);
     }
@@ -174,11 +179,12 @@ public class AttendanceHistoryPanel extends JPanel {
         List<Asistencia> lista = asistenciaDAO.buscarPorFiltros(desde, hasta, grupoId, null);
         modeloTabla.setRowCount(0);
         for (Asistencia a : lista) {
-            String grupo = (a.getGrupoNombre() != null) ? a.getGrupoNombre() : "Sin grupo";
+            String gNombre = a.getGrupoNombre() != null ? a.getGrupoNombre() : "";
+            String gGrado  = a.getGrupoGrado()  != null ? a.getGrupoGrado()  : "";
+            String grupo   = gGrado.isEmpty() ? (gNombre.isEmpty() ? "-" : gNombre) : gGrado + " " + gNombre;
             modeloTabla.addRow(new Object[]{
                 a.getAlumnoNombre(),
                 grupo,
-                a.getFechaTexto(),
                 a.getHoraEntrada(),
                 a.getHoraSalida(),
                 a.getEstado()

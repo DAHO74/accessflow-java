@@ -83,6 +83,35 @@ public class AlumnoDAO {
         return lista;
     }
 
+    public List<Alumno> buscarPorNombreORfid(String query) {
+        List<Alumno> lista = new ArrayList<>();
+        String sql = SELECT_BASE + "WHERE a.nombre LIKE ? OR a.rfid_uid = ? ORDER BY a.nombre";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + query + "%");
+            ps.setString(2, query);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) lista.add(mapear(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    public List<Alumno> listarPorGrupoId(int grupoId) {
+        List<Alumno> lista = new ArrayList<>();
+        String sql = SELECT_BASE + "WHERE a.grupo_id = ? ORDER BY a.nombre";
+        try (Connection con = Conexion.obtener();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, grupoId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) lista.add(mapear(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
     public void asignarAlumnos(int tutorId, java.util.List<Integer> alumnoIds) {
         try (Connection con = Conexion.obtener()) {
             // Quitar asignación previa de este tutor

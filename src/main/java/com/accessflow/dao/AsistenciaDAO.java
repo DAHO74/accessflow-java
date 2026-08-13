@@ -13,7 +13,7 @@ public class AsistenciaDAO {
 
     public List<Asistencia> listarHoy() {
         List<Asistencia> lista = new ArrayList<>();
-        String sql = "SELECT a.*, al.nombre AS alumno_nombre, g.nombre AS grupo_nombre " +
+        String sql = "SELECT a.*, al.nombre AS alumno_nombre, g.nombre AS grupo_nombre, g.grado AS grupo_grado " +
                      "FROM Asistencia a " +
                      "LEFT JOIN Alumno al ON a.alumno_id = al.id " +
                      "LEFT JOIN Grupo g ON al.grupo_id = g.id " +
@@ -104,7 +104,7 @@ public class AsistenciaDAO {
         List<Asistencia> lista = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
-            "SELECT a.*, al.nombre AS alumno_nombre, g.nombre AS grupo_nombre " +
+            "SELECT a.*, al.nombre AS alumno_nombre, g.nombre AS grupo_nombre, g.grado AS grupo_grado " +
             "FROM Asistencia a " +
             "LEFT JOIN Alumno al ON a.alumno_id = al.id " +
             "LEFT JOIN Grupo g ON al.grupo_id = g.id " +
@@ -151,6 +151,7 @@ public class AsistenciaDAO {
         a.setAlumnoId(rs.getInt("alumno_id"));
         a.setAlumnoNombre(rs.getString("alumno_nombre"));
         a.setGrupoNombre(rs.getString("grupo_nombre"));
+        a.setGrupoGrado(rs.getString("grupo_grado"));
         Timestamp tsEntrada = rs.getTimestamp("fecha_entrada");
         if (tsEntrada != null) a.setFechaEntrada(tsEntrada.toLocalDateTime());
         Timestamp tsSalida = rs.getTimestamp("fecha_salida");

@@ -12,6 +12,7 @@ public class Asistencia {
     private int           alumnoId;
     private String        alumnoNombre; // para mostrar en tablas
     private String        grupoNombre;  // para mostrar en tablas
+    private String        grupoGrado;   // para mostrar en tablas
     private LocalDateTime fechaEntrada;
     private LocalDateTime fechaSalida;
 
@@ -25,6 +26,8 @@ public class Asistencia {
     public void setAlumnoNombre(String nombre) { this.alumnoNombre = nombre; }
     public String getGrupoNombre()             { return grupoNombre; }
     public void setGrupoNombre(String nombre)  { this.grupoNombre = nombre; }
+    public String getGrupoGrado()              { return grupoGrado; }
+    public void setGrupoGrado(String grado)    { this.grupoGrado = grado; }
     public LocalDateTime getFechaEntrada()     { return fechaEntrada; }
     public void setFechaEntrada(LocalDateTime dt) { this.fechaEntrada = dt; }
     public LocalDateTime getFechaSalida()      { return fechaSalida; }

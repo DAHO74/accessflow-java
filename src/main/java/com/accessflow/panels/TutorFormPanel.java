@@ -17,7 +17,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
-import java.awt.event.ItemEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -142,14 +143,13 @@ public class TutorFormPanel extends JPanel {
         panelOtroParentesco.add(campoOtroParentesco,   BorderLayout.CENTER);
         panelOtroParentesco.setVisible(false);
 
-        cmbParentesco.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                boolean esOtro = "Otro".equals(e.getItem());
-                panelOtroParentesco.setVisible(esOtro);
-                panel.invalidate();
-                panel.validate();
-                panel.repaint();
-            }
+        cmbParentesco.addActionListener(e -> {
+            boolean esOtro = "Otro".equals(cmbParentesco.getSelectedItem());
+            panelOtroParentesco.setVisible(esOtro);
+            if (!esOtro) campoOtroParentesco.setText("");
+            java.awt.Window w = SwingUtilities.getWindowAncestor(panelOtroParentesco);
+            if (w != null) { w.validate(); w.repaint(); }
+            else { panel.revalidate(); panel.repaint(); }
         });
 
         // ── Error y botones ───────────────────────────
@@ -358,7 +358,6 @@ public class TutorFormPanel extends JPanel {
             if (!esPredefinido) {
                 cmbParentesco.setSelectedItem("Otro");
                 campoOtroParentesco.setText(p);
-                panelOtroParentesco.setVisible(true);
             }
         }
     }
@@ -479,28 +478,39 @@ public class TutorFormPanel extends JPanel {
     }
 
     private void aplicarFiltroTelefono(JTextField campo) {
+        // KeyListener: bloquea caracteres inválidos al teclear
+        campo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (c < ' ') return; // backspace, delete, etc.
+                if (!Character.isDigit(c) && c != '-') { e.consume(); return; }
+                int ss = campo.getSelectionStart(), se = campo.getSelectionEnd();
+                String cur  = campo.getText();
+                String next = cur.substring(0, ss) + c + cur.substring(se);
+                long digits = next.chars().filter(Character::isDigit).count();
+                if (Character.isDigit(c) && digits > 10) { e.consume(); return; }
+                if (next.length() > 12) e.consume();
+            }
+        });
+        // DocumentFilter: cubre pegado y entrada programática
         ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
                     throws BadLocationException {
                 if (text == null) return;
                 String limpio    = text.replaceAll("[^0-9\\-]", "");
-                String resultado = resultante(fb, offset, 0, limpio);
-                if (valido(resultado))
-                    super.insertString(fb, offset, limpio, attr);
+                String actual    = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String resultado = actual.substring(0, offset) + limpio + actual.substring(offset);
+                if (valido(resultado)) super.insertString(fb, offset, limpio, attr);
             }
             @Override
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                     throws BadLocationException {
                 String limpio    = (text == null) ? "" : text.replaceAll("[^0-9\\-]", "");
-                String resultado = resultante(fb, offset, length, limpio);
-                if (valido(resultado))
-                    super.replace(fb, offset, length, limpio, attrs);
-            }
-            private String resultante(FilterBypass fb, int offset, int length, String nuevo)
-                    throws BadLocationException {
-                String actual = fb.getDocument().getText(0, fb.getDocument().getLength());
-                return actual.substring(0, offset) + nuevo + actual.substring(offset + length);
+                String actual    = fb.getDocument().getText(0, fb.getDocument().getLength());
+                String resultado = actual.substring(0, offset) + limpio + actual.substring(offset + length);
+                if (valido(resultado)) super.replace(fb, offset, length, limpio, attrs);
             }
             private boolean valido(String s) {
                 long digitos = s.chars().filter(Character::isDigit).count();

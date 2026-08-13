@@ -6,6 +6,7 @@ import com.accessflow.dao.GrupoDAO;
 import com.accessflow.model.Asistencia;
 import com.accessflow.util.Colores;
 
+import com.accessflow.util.Componentes;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
@@ -45,7 +46,7 @@ public class DashboardPanel extends JPanel {
         header.setBackground(Colores.FONDO_OSCURO);
         header.setBorder(new EmptyBorder(0, 0, 4, 0));
 
-        JLabel titulo = new JLabel("Dashboard");
+        JLabel titulo = new JLabel("Inicio");
         titulo.setFont(Colores.FUENTE_TITULO);
         titulo.setForeground(Colores.TEXTO_CLARO);
 
@@ -151,6 +152,12 @@ public class DashboardPanel extends JPanel {
         tabla.setShowVerticalLines(false);
         tabla.setIntercellSpacing(new Dimension(0, 1));
 
+        javax.swing.table.DefaultTableCellRenderer centrado = Componentes.rendererCentrado();
+        tabla.getColumnModel().getColumn(1).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(2).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(3).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(4).setCellRenderer(centrado);
+
         JTableHeader encabezado = tabla.getTableHeader();
         encabezado.setBackground(Colores.FONDO_OSCURO);
         encabezado.setForeground(Colores.TEXTO_GRIS);
@@ -186,7 +193,9 @@ public class DashboardPanel extends JPanel {
         modeloTabla.setRowCount(0);
         List<Asistencia> lista = asistenciaDAO.listarHoy();
         for (Asistencia a : lista) {
-            String grupo = (a.getGrupoNombre() != null) ? a.getGrupoNombre() : "-";
+            String gNombre = a.getGrupoNombre() != null ? a.getGrupoNombre() : "";
+            String gGrado  = a.getGrupoGrado()  != null ? a.getGrupoGrado()  : "";
+            String grupo   = gGrado.isEmpty() ? (gNombre.isEmpty() ? "-" : gNombre) : gGrado + " " + gNombre;
             modeloTabla.addRow(new Object[]{
                 a.getAlumnoNombre(),
                 grupo,

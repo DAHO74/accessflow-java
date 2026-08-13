@@ -109,6 +109,11 @@ public class GroupsPanel extends JPanel {
         tabla.getColumnModel().getColumn(1).setPreferredWidth(380);
         tabla.getColumnModel().getColumn(2).setPreferredWidth(180);
 
+        javax.swing.table.DefaultTableCellRenderer centrado = Componentes.rendererCentrado();
+        tabla.getColumnModel().getColumn(0).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(1).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(2).setCellRenderer(centrado);
+
         return Componentes.crearScrollTabla(tabla);
     }
 

@@ -4,18 +4,21 @@ import com.accessflow.dao.ConfiguracionDAO;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import java.io.File;
 import java.util.Properties;
 
 public class EmailService {
 
     private static final ConfiguracionDAO configuracionDAO = new ConfiguracionDAO();
 
-    /**
-     * Envía un correo electrónico usando la configuración SMTP guardada en BD.
-     * Devuelve null si el envío fue exitoso, o un mensaje de error en caso contrario.
-     */
     public static String enviar(String destinatario, String asunto, String cuerpo) {
+        return enviarConAdjunto(destinatario, asunto, cuerpo, null);
+    }
+
+    public static String enviarConAdjunto(String destinatario, String asunto, String cuerpo, File adjunto) {
         String host     = configuracionDAO.obtener("smtp_host");
         String puerto   = configuracionDAO.obtener("smtp_puerto");
         String usuario  = configuracionDAO.obtener("smtp_usuario");
@@ -43,10 +46,26 @@ public class EmailService {
             msg.setFrom(new InternetAddress(usuario));
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
             msg.setSubject(asunto);
-            msg.setText(cuerpo);
+
+            if (adjunto != null && adjunto.exists()) {
+                MimeMultipart multipart = new MimeMultipart();
+
+                MimeBodyPart textoParte = new MimeBodyPart();
+                textoParte.setText(cuerpo, "utf-8");
+                multipart.addBodyPart(textoParte);
+
+                MimeBodyPart adjuntoParte = new MimeBodyPart();
+                adjuntoParte.attachFile(adjunto);
+                multipart.addBodyPart(adjuntoParte);
+
+                msg.setContent(multipart);
+            } else {
+                msg.setText(cuerpo);
+            }
+
             Transport.send(msg);
-            return null; // sin error
-        } catch (MessagingException e) {
+            return null;
+        } catch (Exception e) {
             return "Error al enviar: " + e.getMessage();
         }
     }

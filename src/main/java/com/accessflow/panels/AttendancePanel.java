@@ -2,8 +2,11 @@ package com.accessflow.panels;
 
 import com.accessflow.dao.AlumnoDAO;
 import com.accessflow.dao.AsistenciaDAO;
+import com.accessflow.dao.TutorDAO;
 import com.accessflow.model.Alumno;
 import com.accessflow.model.Asistencia;
+import com.accessflow.model.Tutor;
+import com.accessflow.service.EmailService;
 import com.accessflow.util.Colores;
 import com.accessflow.util.Componentes;
 import com.accessflow.view.MainFrame;
@@ -12,6 +15,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AttendancePanel extends JPanel {
@@ -19,6 +24,7 @@ public class AttendancePanel extends JPanel {
     private final MainFrame      mainFrame;
     private final AlumnoDAO      alumnoDAO      = new AlumnoDAO();
     private final AsistenciaDAO  asistenciaDAO  = new AsistenciaDAO();
+    private final TutorDAO       tutorDAO       = new TutorDAO();
 
     private JTextField        campoRfid;
     private JLabel            lblMensaje;
@@ -117,7 +123,7 @@ public class AttendancePanel extends JPanel {
     }
 
     private JScrollPane construirTabla() {
-        String[] columnas = {"Alumno", "Grupo", "Hora entrada", "Hora salida", "Estado"};
+        String[] columnas = {"Alumno", "Grupo", "Entrada", "Salida", "Estado"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -130,6 +136,12 @@ public class AttendancePanel extends JPanel {
         tabla.getColumnModel().getColumn(2).setPreferredWidth(120);
         tabla.getColumnModel().getColumn(3).setPreferredWidth(120);
         tabla.getColumnModel().getColumn(4).setPreferredWidth(110);
+
+        javax.swing.table.DefaultTableCellRenderer centrado = Componentes.rendererCentrado();
+        tabla.getColumnModel().getColumn(1).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(2).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(3).setCellRenderer(centrado);
+        tabla.getColumnModel().getColumn(4).setCellRenderer(centrado);
 
         return Componentes.crearScrollTabla(tabla);
     }
@@ -158,6 +170,7 @@ public class AttendancePanel extends JPanel {
             boolean ok = asistenciaDAO.registrarSalida(sesionActiva.getId());
             if (ok) {
                 mostrarMensaje("Salida registrada: " + alumno.getNombre(), Colores.AZUL_PRIMARIO);
+                enviarCorreoAsincrono(alumno, false);
             } else {
                 mostrarMensaje("Error al registrar salida.", Colores.ROJO);
             }
@@ -165,6 +178,7 @@ public class AttendancePanel extends JPanel {
             boolean ok = asistenciaDAO.registrarEntrada(alumno.getId());
             if (ok) {
                 mostrarMensaje("Entrada registrada: " + alumno.getNombre(), Colores.VERDE);
+                enviarCorreoAsincrono(alumno, true);
             } else {
                 mostrarMensaje("Error al registrar entrada.", Colores.ROJO);
             }
@@ -180,7 +194,9 @@ public class AttendancePanel extends JPanel {
         List<Asistencia> lista = asistenciaDAO.listarHoy();
         modeloTabla.setRowCount(0);
         for (Asistencia a : lista) {
-            String grupo = (a.getGrupoNombre() != null) ? a.getGrupoNombre() : "Sin grupo";
+            String gNombre = a.getGrupoNombre() != null ? a.getGrupoNombre() : "";
+            String gGrado  = a.getGrupoGrado()  != null ? a.getGrupoGrado()  : "";
+            String grupo   = gGrado.isEmpty() ? (gNombre.isEmpty() ? "-" : gNombre) : gGrado + " " + gNombre;
             modeloTabla.addRow(new Object[]{
                 a.getAlumnoNombre(),
                 grupo,
@@ -194,6 +210,24 @@ public class AttendancePanel extends JPanel {
     private void actualizarContador() {
         int presentes = asistenciaDAO.contarPresentesHoy();
         lblPresentes.setText(presentes + " presentes hoy");
+    }
+
+    private void enviarCorreoAsincrono(Alumno alumno, boolean esEntrada) {
+        if (alumno.getTutorId() <= 0) return;
+        new Thread(() -> {
+            Tutor tutor = tutorDAO.buscarPorId(alumno.getTutorId());
+            if (tutor == null || tutor.getEmail() == null || tutor.getEmail().isEmpty()) return;
+
+            String hora   = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
+            String evento = esEntrada ? "entrado" : "salido";
+            String asunto = "AccessFlow — Su hijo/a ha " + evento + " de la institución";
+            String cuerpo = "Estimado/a " + tutor.getNombre() + ",\n\n"
+                + "Le informamos que su hijo/a " + alumno.getNombre()
+                + " ha " + evento + " de la institución a las " + hora + " hrs.\n\n"
+                + "— Sistema AccessFlow";
+
+            EmailService.enviar(tutor.getEmail(), asunto, cuerpo);
+        }).start();
     }
 
     private void mostrarMensaje(String texto, Color color) {

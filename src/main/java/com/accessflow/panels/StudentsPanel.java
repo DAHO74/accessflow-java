@@ -134,9 +134,11 @@ public class StudentsPanel extends JPanel {
         modeloTabla.setRowCount(0);
         alumnosVisibles.clear();
         for (Alumno a : lista) {
-            String rfid  = (a.getRfidUid()    != null && !a.getRfidUid().isEmpty())    ? a.getRfidUid()    : "-";
-            String grupo = (a.getGrupoNombre() != null && !a.getGrupoNombre().isEmpty()) ? a.getGrupoNombre() : "Sin grupo";
-            String tutor = (a.getTutorNombre() != null && !a.getTutorNombre().isEmpty()) ? a.getTutorNombre() : "Sin tutor";
+            String rfid    = (a.getRfidUid()    != null && !a.getRfidUid().isEmpty())    ? a.getRfidUid()    : "-";
+            String gNombre = a.getGrupoNombre() != null ? a.getGrupoNombre() : "";
+            String gGrado  = a.getGrupoGrado()  != null ? a.getGrupoGrado()  : "";
+            String grupo   = gGrado.isEmpty() ? (gNombre.isEmpty() ? "Sin grupo" : gNombre) : gGrado + " " + gNombre;
+            String tutor   = (a.getTutorNombre() != null && !a.getTutorNombre().isEmpty()) ? a.getTutorNombre() : "Sin tutor";
             modeloTabla.addRow(new Object[]{a.getNombre(), grupo, rfid, tutor});
             alumnosVisibles.add(a);
         }
