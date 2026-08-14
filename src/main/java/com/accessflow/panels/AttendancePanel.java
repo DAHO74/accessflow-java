@@ -37,7 +37,7 @@ public class AttendancePanel extends JPanel {
     private JLabel            lblPresentes;
     private JTable            tabla;
     private DefaultTableModel modeloTabla;
-    private HttpServer        servidorHttp;
+    private static HttpServer servidorHttp;
 
     public AttendancePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -244,6 +244,7 @@ public class AttendancePanel extends JPanel {
     }
 
     private void iniciarServidorHttp() {
+        if (servidorHttp != null) return;
         try {
             servidorHttp = HttpServer.create(new InetSocketAddress(8080), 0);
             servidorHttp.createContext("/rfid", exchange -> {
